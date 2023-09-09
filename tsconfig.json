@@ -1,0 +1,42 @@
+{
+    /*** Top Level. */
+    /*** 顶层配置. */
+
+    /** Specify a list of glob patterns that match files to be included in compilation. */
+    /** 指定一组需要纳入编译的文件. */
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+
+    /*** Compiler Options. */
+    /*** 编译选项. */
+    "compilerOptions": {
+
+        /** Type Checking. */
+        /** 类型检查. */
+
+        /* Enable all the strict type checking options. */
+        /* 启用所有严格的类型检查选项. */
+        "strict": true,
+
+        /** Modules. */
+        /** 模块. */
+
+        /* Specify the module system of the generated JavaScript files. */
+        /* 指定生成的 JavaScript 文件的模块系统. */
+        "module": "ESNext",
+
+        /* Specify how TypeScript looks up a file from a given module specifier. */
+        /* 指定 TypeScript 如何寻找和组织模块文件. */
+        "moduleResolution": "node",
+
+        /* Specify a list of bundled lib declaration files that describe the target runtime environment. */
+        /* 指定一组在运行时环境中默认导入的依赖项. */
+        "lib": ["ESNext", "DOM"],
+
+        /* Specify the language version of the generated JavaScript code. */
+        /* 指定生成的 JavaScript 代码的语言版本. */
+        "target": "ESNext"
+    }
+
+    /*** See more keys and their definitions at https://www.typescriptlang.org/tsconfig. */
+    /*** 从这里查看更多键以及它们的定义: https://www.typescriptlang.org/tsconfig. */
+}
