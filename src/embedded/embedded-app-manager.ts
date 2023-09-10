@@ -2,6 +2,7 @@ import { App, MarkdownView, TFile, WorkspaceLeaf } from "obsidian";
 import { createApp ,App as VueApp} from "vue";
 import SimpleMindMap from "../simple-mind-map.vue";
 import { EVENT_APP_REFRESH ,MARKMIND_DEFAULT_DATA} from "../constants/constant";
+import { FILE_EXTENSION } from "../constants/constant";
 
 import {
 	findEmbeddedLoomFile,
@@ -10,27 +11,7 @@ import {
 	getLinkHeight,
 	hasLoadedEmbeddedLoom,
 } from "./embed-utils";
-// import { Root, createRoot } from "react-dom/client";
-// import { store } from "src/redux/store";
-// import { deserializeLoomState, serializeLoomState } from "src/data/serialize";
-// import { LoomState } from "src/shared/loom-state/types";
 import _ from "lodash";
-// import { EVENT_APP_REFRESH } from "src/shared/events";
-// import LoomAppWrapper from "src/react/loom-app";
-// import { createAppId } from "../utils";
-
-// interface EmbeddedApp {
-// 	id: string;
-// 	containerEl: HTMLElement;
-// 	leaf: WorkspaceLeaf;
-// 	leafFilePath: string; //Leafs and views are reused, so we need to store a value that won't change
-// 	root?: Root;
-// 	file: TFile;
-// 	mode: "source" | "preview";
-// }
-
-//Stores all embedded apps
-// let embeddedApps: EmbeddedApp[] = [];
 
 /**
  * Iterates through all open markdown leaves and then iterates through all embedded loom links
@@ -69,6 +50,7 @@ export const loadEmbeddedLoomApps = (
 ) => {
 	const view = markdownLeaf.view as MarkdownView;
 	const linkEls = getEmbeddedLoomLinkEls(view, mode);
+	console.log('准备重新渲染0000')
 	// debugger
 	linkEls.forEach((linkEl) =>
 		processLinkEl(app, manifestPluginVersion, markdownLeaf, linkEl, mode)
@@ -100,14 +82,51 @@ const processLinkEl = async (
 	linkEl: HTMLElement,
 	mode: "source" | "preview"
 ) => {
+	const DEFAULT_HEIGHT='400px';
+	const DEFAULT_WIDTH='100%';
 	//Set the width and height of the embedded loom
 	//We do this first because if we have already loaded the loom, we stil want
 	//the width and height of the embed to update if the user changes it
-	setLinkSize(linkEl);
 
+	// setLinkSize(linkEl);
+	console.log('准备重新渲染111')
+	const src = linkEl.getAttribute("src");
+	if(!src){
+		return;
+	}
+	if(!src.endsWith(FILE_EXTENSION)){
+		return;
+	}
 	//If the loom has already been loaded, we don't need to do anything else
-	if (hasLoadedEmbeddedLoom(linkEl)) return;
+	if (hasLoadedEmbeddedLoom(linkEl)) {
+		//将mind的容器高度与挂载的dom保持一致，便于自定义高度
+		if(!linkEl.find('#mindMapContainer')){
+			//mind的容器可能还没渲染好
+			return;
+		}
+		let containHeight=DEFAULT_HEIGHT;
+		if(linkEl.getAttribute("height")!=null){
+			containHeight = linkEl.getAttribute("height")+"px";
+		}
+		// let containWidth=DEFAULT_WIDTH;
+		// if(linkEl.getAttribute("width")!=null){
+		// 	containWidth = linkEl.getAttribute("width")+"px";
+		// }
+		
+		if(containHeight!==linkEl.find('#mindMapContainer').style.height
+			// || containWidth!==linkEl.find('#mindMapContainer').style.width
+			){
+			linkEl.find('#mindMapContainer').style.height=containHeight
+
+			// linkEl.style.width=containWidth
+			// linkEl.find('#mindMapContainer').style.width=containWidth
+			//TODO 通知remind容器尺寸发生了变化，现在是复用了resize，后面改成自己单独的通知消息类型，并指定需要重置的id，优化效率
+			app.workspace.trigger('resize')
+		}
+		return;
+	}
 	
+	console.log('准备重新渲染222')
 
 	const sourcePath = (leaf.view as MarkdownView).file?.path ?? "";
 	const file = findEmbeddedLoomFile(app, linkEl, sourcePath);
@@ -118,19 +137,27 @@ const processLinkEl = async (
 	//Create a container
 	const containerEl = renderContainerEl(linkEl);
 
+	let mindHeight =  linkEl.getAttribute("height");
+	// debugger;
+	if (mindHeight === null || mindHeight === "0") {
+		mindHeight='400';
+	}
+	
+	mindHeight+='px';
+
 	//Get the loom state
 	const data = await app.vault.read(file);
 	// debugger;
 	// console.log(data)
 	const myId = Math.random();   
-	const vm = createApp(SimpleMindMap, { mindFile:file,initMindData: JSON.parse(data),app:app,mode:'edit'}).mount(containerEl);   	
+	const vm = createApp(SimpleMindMap, { mindFile:file,initMindData: JSON.parse(data),app:app,mode:'edit',initElementHeight:mindHeight}).mount(containerEl);   	
 	// debugger;
 	const markMind=vm.$data.markMind; 
 
 	//这里思维导图可能还没有渲染完成，无法执行命令，延迟一点时间
-	setTimeout(() => {		
-		markMind.view.translateY(-50)
-	}, 200);
+	// setTimeout(() => {		
+	// 	markMind.view.translateY(-50)
+	// }, 200);
 
 
 	//  监控导图数据变更事件
@@ -146,59 +173,6 @@ const processLinkEl = async (
 }
 
 
-/**
- * Renders a React app for a loom file
- * @param appId - The unique id of the embedded app
- * @param leaf - The leaf that contains the markdown view
- * @param file - The loom file
- * @param root - The root element of the react app
- * @param state - The loom state
- */
-// const renderApp = (
-// 	app: App,
-// 	appId: string,
-// 	leaf: WorkspaceLeaf,
-// 	file: TFile,
-// 	root: Root,
-// 	state: LoomState
-// ) => {
-// 	//Throttle the save function so we don't save too often
-// 	const THROTTLE_TIME_MILLIS = 2000;
-// 	const throttleHandleSave = _.throttle(handleSave, THROTTLE_TIME_MILLIS);
-
-// 	root.render(
-// 		<LoomAppWrapper
-// 			app={app}
-// 			appId={appId}
-// 			isMarkdownView
-// 			loomFile={file}
-// 			mountLeaf={leaf}
-// 			store={store}
-// 			loomState={state}
-// 			onSaveState={(appId, state) =>
-// 				throttleHandleSave(app, file, appId, state)
-// 			}
-// 		/>
-// 	);
-// };
-
-/**
- * Saves the loom state to the loom file
- * @param file - The loom file
- * @param state - The loom state
- */
-// const  = async (
-// 	app: App,
-// 	file: TFile,
-// 	appId: string,
-// 	state: LoomState
-// ) => {
-// 	const serialized = serializeLoomState(state);
-// 	await app.vault.modify(file, serialized);
-
-// 	//Trigger an event to refresh the other open views of this file
-// 	app.workhandleSavespace.trigger(EVENT_APP_REFRESH, file.path, appId, state);
-// };
 
 /**
  * Creates a container for the embedded loom
@@ -207,7 +181,7 @@ const processLinkEl = async (
  */
 const renderContainerEl = (linkEl: HTMLElement) => {
 	const containerEl = linkEl.createDiv({
-		cls: "dataloom-embedded-container",
+		cls: "mufeng-mind-embedded-container",
 	});
 	containerEl.style.height = "100%";
 	containerEl.style.width = "100%";
@@ -250,9 +224,8 @@ const setLinkSize = (linkEl: HTMLElement) => {
 	// const { defaultEmbedWidth, defaultEmbedHeight } =
 	// 	store.getState().global.settings;
 
-	const width = getLinkWidth(linkEl, '500px');
-	const height = getLinkHeight(linkEl, '500px');
-
+	const width = getLinkWidth(linkEl, '100%');
+	const height = getLinkHeight(linkEl, '100%');
 	linkEl.style.width = width;
 	linkEl.style.height = height;
 };

@@ -29,7 +29,7 @@ export const getEmbeddedLoomLinkEls = (
 export const hasLoadedEmbeddedLoom = (linkEl: HTMLElement) => {
 	if (linkEl.children.length > 0) {
 		const firstChildEl = linkEl.children[0];
-		if (firstChildEl.classList.contains("dataloom-embedded-container"))
+		if (firstChildEl.classList.contains("mufeng-mind-embedded-container"))
 			return true;
 	}
 	return false;

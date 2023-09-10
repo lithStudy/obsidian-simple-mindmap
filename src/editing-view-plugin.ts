@@ -19,7 +19,7 @@ export default function EditingViewPlugin(
 			 */
 			update(update: ViewUpdate) {
 				// debugger
-				// console.log('EditingViewPlugin'+update)
+				// console.log('EditingViewPlugin start')
 				const markdownLeaves =
 					app.workspace.getLeavesOfType("markdown");
 				const activeLeaf = markdownLeaves.find(
@@ -37,6 +37,8 @@ export default function EditingViewPlugin(
 			}
 			destroy(){
 				app.workspace.off(EVENT_APP_REFRESH);
+				app.workspace.off('resize');
+				app.workspace.off("css-change")
 				console.log("销毁编辑插件")
 			}
 		}
