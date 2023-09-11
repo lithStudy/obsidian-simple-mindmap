@@ -62,7 +62,7 @@ export class MufengMakrMindView extends TextFileView {
         // console.log('this.contentEl.offsetHeight:'+this.contentEl.offsetHeight)
         this.vm = createApp(SimpleMindMap, { mindFile:this.file,initMindData: JSON.parse(data),app:this.app,mode:'edit',initElementHeight:height}).mount(this.contentEl);   	
         // const vm = createApp(SimpleMindMap, { initMindData: JSON.parse(data),app:this.app,mindId:myId}).mount(newDiv);      
-        this.markMind= this.vm.mydata.markMind
+        this.markMind= this.vm.mindMap
         if(!this.markMind){
           debugger;
         }
@@ -79,10 +79,10 @@ export class MufengMakrMindView extends TextFileView {
         //   })
 
         //   //默认选中根目录
-          this.markMind.execCommand('GO_TARGET_NODE', this.markMind.renderer.root, () => {
-            //定位完成后的回调函数
-            // this.notHandleDataChange = false
-          })
+          // this.markMind.execCommand('GO_TARGET_NODE', this.markMind.renderer.root, () => {
+          //   //定位完成后的回调函数
+          //   // this.notHandleDataChange = false
+          // })
         },200)
         
       }, 200);

@@ -23,6 +23,7 @@
     },
     "dependencies": {
         "lodash": "^4.17.21",
+        "run": "^1.4.0",
         "simple-mind-map": "^0.7.0"
     }
 }

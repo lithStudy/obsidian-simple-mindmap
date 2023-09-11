@@ -54,7 +54,7 @@
   .container {
     position: absolute;
     left: 10px;
-    top: 10px;
+    top: 50px;
     width: 100px;
     height: 50px;
   }
@@ -82,41 +82,6 @@ import { EVENT_APP_REFRESH ,MARKMIND_DEFAULT_DATA} from "./constants/constant";
 import _ from "lodash";
 
 const THROTTLE_TIME_MILLIS = 3000;
-            console.log('修改11111111111')
-
-
-
-
-// // 更新小地图
-// const miniMapContainer = ref(null)
-// const viewBoxStyle = ref({})
-// const miniMapBoxScale = ref(1)
-// const miniMapBoxLeft = ref(0)
-// const miniMapBoxTop = ref(0)
-// const updateMiniMp = () => {
-//   // 计算小地图数据
-//   let data = mindMap.miniMap.calculationMiniMap(containerWidth, containerHeight)
-//   debugger
-//   // 渲染到小地图
-//   miniMapContainer.value.innerHTML = data.svgHTML
-//   viewBoxStyle.value = data.viewBoxStyle
-//   miniMapBoxScale.value = data.miniMapBoxScale
-//   miniMapBoxLeft.value = data.miniMapBoxLeft
-//   miniMapBoxTop.value = data.miniMapBoxTop
-// }
-// const onMousedown = (e) => {
-//   mindMap.miniMap.onMousedown(e)
-// }
-
-// const onMousemove = (e) => {
-//   mindMap.miniMap.onMousemove(e)
-// }
-
-// const onMouseup = (e) => {
-//   mindMap.miniMap.onMouseup(e)
-// }
-
-
 
 export default defineComponent({
     name: "SampleSettingTabPage",
@@ -153,18 +118,15 @@ export default defineComponent({
     //         // elementHeight:'400px',
     //     }
     // },
-    methods: {
-        
-    },
     setup(props) {
         // const message = ref(props.initMindData)
+        let firstRender=true;
         console.log('ddddd:'+props.initMindData)
 
         // const app = this.app;
-        let mindMap = null
+        let mindMap = ref({})
 
         const mydata = reactive({
-            markMind:null,
             mindMapData:{data:{},children:[]},
             compId:null,
             mindMode:'edit',
@@ -193,16 +155,24 @@ export default defineComponent({
             miniMapBoxTop.value = data.miniMapBoxTop;
         };
 
+        const goTargetRoot=()=>{
+            mindMap.execCommand('GO_TARGET_NODE', mindMap.renderer.root, () => {
+                //定位完成后的回调函数
+                // this.notHandleDataChange = false
+            })
+        }
+
         const onMousedown = (e) => {
-        mindMap.miniMap.onMousedown(e);
+            mindMap.miniMap.onMousedown(e);
         };
 
         const onMousemove = (e) => {
-        mindMap.miniMap.onMousemove(e);
+            console.log('onMousemove')
+            mindMap.miniMap.onMousemove(e);
         };
 
         const onMouseup = (e) => {
-        mindMap.miniMap.onMouseup(e);
+            mindMap.miniMap.onMouseup(e);
         };
 
         
@@ -211,24 +181,34 @@ export default defineComponent({
 			if(mydata.compId!==newCompId){
                 // debugger
                 console.log('监听到其他视图的刷新事件：当前视图id：'+mydata.compId+",其他视图："+newCompId)
-                if(JSON.stringify(mydata.markMind.getData(false))===JSON.stringify(newMindData)){
+                if(JSON.stringify(mindMap.getData(false))===JSON.stringify(newMindData)){
                     console.log("数据相等，不重新渲染")
                 }else{
                     //这里不能直接用setData方法，会导致循环依赖保存
-                    // this.markMind.setData(mindData)  
+                    // this.mindMap.setData(mindData)  
                     console.log("触发刷新，当前视图id："+this.compId)      
-                    mydata.markMind.execCommand('CLEAR_ACTIVE_NODE')
-                    mydata.markMind.command.clearHistory()
-                    mydata.markMind.renderer.renderTree = newMindData;
-                    mydata.markMind.reRender(() => {}, 'setData') 
+                    mindMap.execCommand('CLEAR_ACTIVE_NODE')
+                    mindMap.command.clearHistory()
+                    mindMap.renderer.renderTree = newMindData;
+                    mindMap.reRender(() => {}, 'setData') 
 
                     // this.markMind.setData(newMindData)
                 }
             }
 		};
 
+        
+
         // 在组件挂载时调用 updateMiniMap 函数
         onMounted(() => {
+
+            //节流保存数据
+            const throttleSave = _.throttle((mindDataTempParam:{})=>{
+                    console.log('修改222222222222')
+                    props.app.vault.modify(props.mindFile, JSON.stringify(mindDataTempParam));
+                    //触发刷新事件用于通知其他视图刷新
+                    props.app.workspace.trigger(EVENT_APP_REFRESH,mydata.compId,mindDataTempParam);
+                }, THROTTLE_TIME_MILLIS);
 
             mydata.compId = Math.random();   
 
@@ -259,7 +239,7 @@ export default defineComponent({
             MindMap.usePlugin(MiniMap)
             // MindMap.usePlugin(RichText)
             // debugger;
-            mydata.markMind = new MindMap({
+            mindMap = new MindMap({
                 el: el_temp,
                 //主题：logicalStructure（逻辑结构图）、mindMap（思维导图）、organizationStructure（组织结构图）、catalogOrganization（目录组织图）、timeline（时间轴）、timeline2（时间轴2）、fishbone（鱼骨图）、verticalTimeline（v0.6.6+竖向时间轴）
                 layout: 'mindMap',
@@ -271,27 +251,29 @@ export default defineComponent({
                 mousewheelAction: 'move',// zoom（放大缩小）、move（上下移动）
                 data: mydata.mindMapData
             });	
-            mindMap = mydata.markMind;	
+            
+            
 
-            //节流保存数据
-            const throttleSave = _.throttle((mindDataTempParam:{})=>{
-                console.log('修改222222222222')
-                props.app.vault.modify(props.mindFile, JSON.stringify(mindDataTempParam));
-                //触发刷新事件用于通知其他视图刷新
-                props.app.workspace.trigger(EVENT_APP_REFRESH,mydata.compId,mindDataTempParam);
-            }, THROTTLE_TIME_MILLIS);
+            
+            
 
-            mydata.markMind.on('node_tree_render_end',(...args)=>{
-                // console.log("节点渲染完毕:"+mydata.markMind)
+            mindMap.on('node_tree_render_end',(...args)=>{
+                // console.log("节点渲染完毕:"+mindMap)
+                updateMiniMap();
+                if(firstRender){
+                    goTargetRoot();
+                }
+                firstRender = false;
+                
                 // this.app.workspace.containerEl.find('#mindMapContainer').style.height='1000px'
                 // this.markMind.resize();
                 // debugger
             })
             // debugger
             //监控导图数据变更事件
-            mydata.markMind.on('data_change', (...args) => {
+            mindMap.on('data_change', (...args) => {
                 // debugger
-                updateMiniMap()
+                // updateMiniMap()
                 throttleSave(args[0]);
                 // this.app.vault.modify(this.mindFile, JSON.stringify(args[0]));
                 // //触发刷新事件用于通知其他视图刷新
@@ -309,20 +291,19 @@ export default defineComponent({
                 // debugger;
                 console.log('resize')
                 //重置思维导图尺寸
-                mydata.markMind.resize();
+                mindMap.resize();
             })
 
             props.app.workspace.on("css-change", () => {            
                 const el = document.querySelector("body");
                 //是否深色模式
                 if(el?.className.includes("theme-dark") ?? false){
-                    mydata.markMind.setTheme('dark')
+                    mindMap.setTheme('dark')
                 }else{
-                    mydata.markMind.setTheme('default')
+                    mindMap.setTheme('default')
                 }
             },props.app)
 
-            updateMiniMap();
         });
 
         // // 在组件销毁时进行清理操作
@@ -330,7 +311,7 @@ export default defineComponent({
         // // 清理操作，例如取消事件监听等
         // });
 
-        provide('mindMap', mindMap); // 使用 provide 函数将 message 变量提供给父组件
+        // provide('mindMap', mindMap); // 使用 provide 函数将变量提供给父组件
         return {
             miniMapContainer,
             viewBoxStyle,
@@ -343,7 +324,9 @@ export default defineComponent({
             onMouseup,
             mydata,
             handleRefreshEvent,
-            mindMapContainerRef
+            mindMapContainerRef,
+            mindMap,
+            goTargetRoot
         };
     },
 	mounted() {
