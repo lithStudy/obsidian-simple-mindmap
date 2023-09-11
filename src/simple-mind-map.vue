@@ -4,25 +4,9 @@
         <!-- <span class="sample-class">{{ count }}</span> -->
 		    <!-- <div id="mindMapContainer" ref="mindMapContainerRef"></div> -->
             <div id="mindMapContainer" ref="mindMapContainerRef" :style="{ height: initElementHeight }"></div>
-            <div 
-                class="container"
-                @mousedown="onMousedown"
-                    @mousemove="onMousemove"
-                    @mouseup="onMouseup"
-                >
-                    <div 
-                    class="miniMapContainer" 
-                    ref="miniMapContainer"
-                    :style="{
-                        transform: `scale(${miniMapBoxScale})`,
-                        left: miniMapBoxLeft + 'px',
-                        top: miniMapBoxTop + 'px'
-                        }"
-                >
-                    
-            </div>
-            <div class="viewBoxContainer" :style="viewBoxStyle"></div>
-            </div>
+
+            <div id="miniMap"></div>
+            <!-- <Navigator :mindMap="mindMap" ></Navigator> -->
     </div>
 </template>
 
@@ -72,7 +56,7 @@
 </style>
 
 <script lang="ts">
-import { defineComponent,ref, onMounted, shallowRef,reactive,provide   } from "vue";
+import { createApp,defineComponent,ref, onMounted, shallowRef,reactive,provide,inject} from "vue";
 import MindMap from "simple-mind-map";
 import Drag from "simple-mind-map/src/plugins/Drag.js"
 import KeyboardNavigation from 'simple-mind-map/src/plugins/KeyboardNavigation.js'
@@ -80,11 +64,16 @@ import MiniMap from 'simple-mind-map/src/plugins/MiniMap.js'
 import { App} from "obsidian";
 import { EVENT_APP_REFRESH ,MARKMIND_DEFAULT_DATA} from "./constants/constant";
 import _ from "lodash";
+import Navigator from 'Navigator.vue'
+
 
 const THROTTLE_TIME_MILLIS = 3000;
 
 export default defineComponent({
     name: "SampleSettingTabPage",
+    components: {
+        Navigator
+    },
     // props: ['mindFile','initMindData','app','mode','initElementHeight'],
     props:{
         mindFile: {            
@@ -125,6 +114,7 @@ export default defineComponent({
 
         // const app = this.app;
         let mindMap = ref({})
+        provide('mindMap', mindMap);
 
         const mydata = reactive({
             mindMapData:{data:{},children:[]},
@@ -133,27 +123,27 @@ export default defineComponent({
             mindTheme:'dark',
         })
 
-        // 小地图容器的宽高
-        const containerWidth = 100
-        const containerHeight = 50
+        // // 小地图容器的宽高
+        // const containerWidth = 100
+        // const containerHeight = 50
+        // const miniMapContainer = ref(null);
+        // const viewBoxStyle = ref({});
+        // const miniMapBoxScale = ref(1);
+        // const miniMapBoxLeft = ref(0);
+        // const miniMapBoxTop = ref(0);
         const mindMapContainerRef = ref(null);
-        const miniMapContainer = ref(null);
-        const viewBoxStyle = ref({});
-        const miniMapBoxScale = ref(1);
-        const miniMapBoxLeft = ref(0);
-        const miniMapBoxTop = ref(0);
 
-        const updateMiniMap = () => {
-            // 计算小地图数据
-            let data = mindMap.miniMap.calculationMiniMap(containerWidth, containerHeight);
+        // const updateMiniMap = () => {
+        //     // 计算小地图数据
+        //     let data = mindMap.miniMap.calculationMiniMap(containerWidth, containerHeight);
 
-            // 渲染到小地图
-            miniMapContainer.value.innerHTML = data.svgHTML;
-            viewBoxStyle.value = data.viewBoxStyle;
-            miniMapBoxScale.value = data.miniMapBoxScale;
-            miniMapBoxLeft.value = data.miniMapBoxLeft;
-            miniMapBoxTop.value = data.miniMapBoxTop;
-        };
+        //     // 渲染到小地图
+        //     miniMapContainer.value.innerHTML = data.svgHTML;
+        //     viewBoxStyle.value = data.viewBoxStyle;
+        //     miniMapBoxScale.value = data.miniMapBoxScale;
+        //     miniMapBoxLeft.value = data.miniMapBoxLeft;
+        //     miniMapBoxTop.value = data.miniMapBoxTop;
+        // };
 
         const goTargetRoot=()=>{
             mindMap.execCommand('GO_TARGET_NODE', mindMap.renderer.root, () => {
@@ -201,6 +191,7 @@ export default defineComponent({
 
         // 在组件挂载时调用 updateMiniMap 函数
         onMounted(() => {
+            const eventBus = inject('$bus');
 
             //节流保存数据
             const throttleSave = _.throttle((mindDataTempParam:{})=>{
@@ -252,33 +243,31 @@ export default defineComponent({
                 data: mydata.mindMapData
             });	
             
-            
-
-            
-            
 
             mindMap.on('node_tree_render_end',(...args)=>{
                 // console.log("节点渲染完毕:"+mindMap)
-                updateMiniMap();
+                // updateMiniMap();
                 if(firstRender){
                     goTargetRoot();
                 }
                 firstRender = false;
-                
-                // this.app.workspace.containerEl.find('#mindMapContainer').style.height='1000px'
-                // this.markMind.resize();
-                // debugger
             })
             // debugger
             //监控导图数据变更事件
             mindMap.on('data_change', (...args) => {
-                // debugger
-                // updateMiniMap()
+                if (eventBus) {
+                    eventBus.emit('data_change', ...args); // 发布事件
+                }
+
                 throttleSave(args[0]);
+
+               
+
                 // this.app.vault.modify(this.mindFile, JSON.stringify(args[0]));
                 // //触发刷新事件用于通知其他视图刷新
                 // this.app.workspace.trigger(EVENT_APP_REFRESH,this.compId,args[0]);
             })
+            
 
             //监听刷新事件，刷新视图
             props.app.workspace.on(
@@ -304,6 +293,9 @@ export default defineComponent({
                 }
             },props.app)
 
+
+            createApp(Navigator, { mindMap:mindMap}).mount(document.getElementById('miniMap'));
+
         });
 
         // // 在组件销毁时进行清理操作
@@ -313,18 +305,18 @@ export default defineComponent({
 
         // provide('mindMap', mindMap); // 使用 provide 函数将变量提供给父组件
         return {
-            miniMapContainer,
-            viewBoxStyle,
-            miniMapBoxScale,
-            miniMapBoxLeft,
-            miniMapBoxTop,
-            updateMiniMap,
+            // miniMapContainer,
+            // viewBoxStyle,
+            // miniMapBoxScale,
+            // miniMapBoxLeft,
+            // miniMapBoxTop,
+            // updateMiniMap,
+            mindMapContainerRef,
             onMousedown,
             onMousemove,
             onMouseup,
             mydata,
             handleRefreshEvent,
-            mindMapContainerRef,
             mindMap,
             goTargetRoot
         };

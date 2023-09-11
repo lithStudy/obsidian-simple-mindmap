@@ -3,6 +3,7 @@ import { createApp ,App as VueApp} from "vue";
 import SimpleMindMap from "./simple-mind-map.vue";
 import MindMap from "simple-mind-map";
 import { EVENT_APP_REFRESH ,MARKMIND_DEFAULT_DATA} from "./constants/constant";
+import mitt from 'mitt';
 
 export const MUFENG_MARKMIND_VIEW = "mufeng-markmind";
 
@@ -60,7 +61,10 @@ export class MufengMakrMindView extends TextFileView {
      //这里容器可能还没有渲染完成，无法执行命令，延迟一点时间
       setTimeout(() => {
         // console.log('this.contentEl.offsetHeight:'+this.contentEl.offsetHeight)
-        this.vm = createApp(SimpleMindMap, { mindFile:this.file,initMindData: JSON.parse(data),app:this.app,mode:'edit',initElementHeight:height}).mount(this.contentEl);   	
+        const myApp = createApp(SimpleMindMap, { mindFile:this.file,initMindData: JSON.parse(data),app:this.app,mode:'edit',initElementHeight:height})
+        myApp.provide('$bus', mitt()); // 在这里提供事件总线
+
+        this.vm = myApp.mount(this.contentEl);   	
         // const vm = createApp(SimpleMindMap, { initMindData: JSON.parse(data),app:this.app,mindId:myId}).mount(newDiv);      
         this.markMind= this.vm.mindMap
         if(!this.markMind){

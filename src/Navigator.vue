@@ -1,8 +1,6 @@
 <template>
   <div
-    v-if="showMiniMap"
     class="navigatorBox"
-    :class="{ isDark: isDark }"
     ref="navigatorBox"
     @mousedown="onMousedown"
     @mousemove="onMousemove"
@@ -22,7 +20,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { inject } from 'vue'
 
 export default {
   props: {
@@ -32,7 +30,7 @@ export default {
   },
   data() {
     return {
-      showMiniMap: false,
+      showMiniMap: true,
       timer: null,
       boxWidth: 0,
       boxHeight: 0,
@@ -48,19 +46,19 @@ export default {
     }
   },
   computed: {
-    ...mapState(['isDark']),
+    // ...mapState(['isDark']),
   },
   mounted() {
-    this.$bus.$on('toggle_mini_map', this.toggle_mini_map)
-    this.$bus.$on('data_change', this.data_change)
-    this.$bus.$on('view_data_change', this.data_change)
-    this.$bus.$on('node_tree_render_end', this.data_change)
+    this.init()
+    // debugger
+    // this.mindMap.on('toggle_mini_map', this.toggle_mini_map)
+    // this.$bus.$on('data_change', this.data_change)
+    this.mindMap.on('view_data_change', this.data_change)
+    this.mindMap.on('node_tree_render_end', this.data_change)
   },
   destroyed() {
-    this.$bus.$off('toggle_mini_map', this.toggle_mini_map)
-    this.$bus.$off('data_change', this.data_change)
-    this.$bus.$off('view_data_change', this.data_change)
-    this.$bus.$off('node_tree_render_end', this.data_change)
+    this.mindMap.off('view_data_change', this.data_change)
+    this.mindMap.off('node_tree_render_end', this.data_change)
   },
   methods: {
     toggle_mini_map(show) {
@@ -97,6 +95,7 @@ export default {
         miniMapBoxLeft,
         miniMapBoxTop
       } = this.mindMap.miniMap.calculationMiniMap(this.boxWidth, this.boxHeight)
+      // debugger
       // 渲染到小地图
       this.$refs.svgBox.innerHTML = svgHTML
       this.viewBoxStyle = viewBoxStyle
@@ -120,7 +119,7 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style  lang="less" scoped>
 .navigatorBox {
   position: absolute;
   width: 350px;
@@ -134,9 +133,9 @@ export default {
   cursor: pointer;
   user-select: none;
 
-  &.isDark {
+  /* &.isDark {
     background-color: #262a2e;
-  }
+  } */
 
   .svgBox {
     position: absolute;
