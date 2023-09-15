@@ -1,7 +1,6 @@
 import { App, MarkdownView, TFile, WorkspaceLeaf } from "obsidian";
 import { createApp ,App as VueApp} from "vue";
-import SimpleMindMap from "../simple-mind-map.vue";
-import { EVENT_APP_REFRESH ,MARKMIND_DEFAULT_DATA} from "../constants/constant";
+import SimpleMindMap from "../mindmapvue/simple-mind-map.vue";
 import { FILE_EXTENSION } from "../constants/constant";
 
 import {
@@ -50,7 +49,6 @@ export const loadEmbeddedLoomApps = (
 ) => {
 	const view = markdownLeaf.view as MarkdownView;
 	const linkEls = getEmbeddedLoomLinkEls(view, mode);
-	console.log('准备重新渲染0000')
 	// debugger
 	linkEls.forEach((linkEl) =>
 		processLinkEl(app, manifestPluginVersion, markdownLeaf, linkEl, mode)
@@ -89,7 +87,6 @@ const processLinkEl = async (
 	//the width and height of the embed to update if the user changes it
 
 	// setLinkSize(linkEl);
-	console.log('准备重新渲染111')
 	const src = linkEl.getAttribute("src");
 	if(!src){
 		return;
@@ -99,34 +96,33 @@ const processLinkEl = async (
 	}
 	//If the loom has already been loaded, we don't need to do anything else
 	if (hasLoadedEmbeddedLoom(linkEl)) {
-		//将mind的容器高度与挂载的dom保持一致，便于自定义高度
-		if(!linkEl.find('#mindMapContainer')){
-			//mind的容器可能还没渲染好
-			return;
-		}
-		let containHeight=DEFAULT_HEIGHT;
-		if(linkEl.getAttribute("height")!=null){
-			containHeight = linkEl.getAttribute("height")+"px";
-		}
-		// let containWidth=DEFAULT_WIDTH;
-		// if(linkEl.getAttribute("width")!=null){
-		// 	containWidth = linkEl.getAttribute("width")+"px";
+		// //将mind的容器高度与挂载的dom保持一致，便于自定义高度
+		// if(!linkEl.find('#mindMapContainer')){
+		// 	//mind的容器可能还没渲染好
+		// 	return;
 		// }
+		// let containHeight=DEFAULT_HEIGHT;
+		// if(linkEl.getAttribute("height")!=null){
+		// 	containHeight = linkEl.getAttribute("height")+"px";
+		// }
+		// // let containWidth=DEFAULT_WIDTH;
+		// // if(linkEl.getAttribute("width")!=null){
+		// // 	containWidth = linkEl.getAttribute("width")+"px";
+		// // }
 		
-		if(containHeight!==linkEl.find('#mindMapContainer').style.height
-			// || containWidth!==linkEl.find('#mindMapContainer').style.width
-			){
-			linkEl.find('#mindMapContainer').style.height=containHeight
+		// if(containHeight!==linkEl.find('#mindMapContainer').style.height
+		// 	// || containWidth!==linkEl.find('#mindMapContainer').style.width
+		// 	){
+		// 	linkEl.find('#mindMapContainer').style.height=containHeight
 
-			// linkEl.style.width=containWidth
-			// linkEl.find('#mindMapContainer').style.width=containWidth
-			//TODO 通知remind容器尺寸发生了变化，现在是复用了resize，后面改成自己单独的通知消息类型，并指定需要重置的id，优化效率
-			app.workspace.trigger('resize')
-		}
+		// 	// linkEl.style.width=containWidth
+		// 	// linkEl.find('#mindMapContainer').style.width=containWidth
+		// 	//TODO 通知remind容器尺寸发生了变化，现在是复用了resize，后面改成自己单独的通知消息类型，并指定需要重置的id，优化效率
+		// 	app.workspace.trigger('resize')
+		// }
 		return;
 	}
 	
-	console.log('准备重新渲染222')
 
 	const sourcePath = (leaf.view as MarkdownView).file?.path ?? "";
 	const file = findEmbeddedLoomFile(app, linkEl, sourcePath);
@@ -149,26 +145,9 @@ const processLinkEl = async (
 	const data = await app.vault.read(file);
 	// debugger;
 	// console.log(data)
-	const myId = Math.random();   
-	const vm = createApp(SimpleMindMap, { mindFile:file,initMindData: JSON.parse(data),app:app,mode:'edit',initElementHeight:mindHeight}).mount(containerEl);   	
-	// debugger;
+	const viewId = Math.random();   
+	const vm = createApp(SimpleMindMap, { leaf:leaf,viewId:viewId,mindFile:file,initMindData: JSON.parse(data),app:app,mode:'edit',initElementHeight:mindHeight,showMiniMap:false,contentEl:containerEl}).mount(containerEl);   	
 	const markMind=vm.$data.markMind; 
-
-	//这里思维导图可能还没有渲染完成，无法执行命令，延迟一点时间
-	// setTimeout(() => {		
-	// 	markMind.view.translateY(-50)
-	// }, 200);
-
-
-	//  监控导图数据变更事件
-	//  markMind.on('data_change', (...args) => {
-		//mindDataChange(args[0],leaf)        
-		// debugger	
-		// app.vault.modify(file, JSON.stringify(args[0]));
-		
-		// //触发刷新事件用于通知其他视图刷新
-		// app.workspace.trigger(EVENT_APP_REFRESH,myId,args[0]);
-	// })
 
 }
 
@@ -183,7 +162,9 @@ const renderContainerEl = (linkEl: HTMLElement) => {
 	const containerEl = linkEl.createDiv({
 		cls: "mufeng-mind-embedded-container",
 	});
-	containerEl.style.height = "100%";
+	// containerEl.style.height = "100%";
+	// containerEl.style.width = "100%";
+	// containerEl.style.height = "800px";
 	containerEl.style.width = "100%";
 	containerEl.style.padding = "10px 0px";
 

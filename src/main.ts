@@ -61,7 +61,7 @@ export default class SamplePlugin extends Plugin {
 
         this.registerView(
           MUFENG_MARKMIND_VIEW,
-          (leaf) => new MufengMakrMindView(leaf)
+          (leaf) => new MufengMakrMindView(leaf,this.manifest.id, this.manifest.version)
         );
         //注册打开特定扩展名的视图
         this.registerExtensions(["mind"], MUFENG_MARKMIND_VIEW);
@@ -95,29 +95,29 @@ export default class SamplePlugin extends Plugin {
         );
 
         //注册mind预览模式下后处理器
-        this.registerMarkdownPostProcessor(async (element, context) => {
-          const linkEl = element.querySelector(".internal-embed");
-          if(linkEl){
-            const src = linkEl.getAttribute("src");
-            //只处理mind后缀的
-            if (src?.endsWith(FILE_EXTENSION)){
-              if (src){
-                const file  = this.app.metadataCache.getFirstLinkpathDest(src, context.sourcePath)
-                if(file){ 
-                  let mindHeight =  linkEl.getAttribute("height");
-                  // debugger;
-                  if (mindHeight === null || mindHeight === "0") {
-                    mindHeight='400';
-                  }
-                  mindHeight+='px';
+        // this.registerMarkdownPostProcessor(async (element, context) => {
+        //   const linkEl = element.querySelector(".internal-embed");
+        //   if(linkEl){
+        //     const src = linkEl.getAttribute("src");
+        //     //只处理mind后缀的
+        //     if (src?.endsWith(FILE_EXTENSION)){
+        //       if (src){
+        //         const file  = this.app.metadataCache.getFirstLinkpathDest(src, context.sourcePath)
+        //         if(file){ 
+        //           let mindHeight =  linkEl.getAttribute("height");
+        //           // debugger;
+        //           if (mindHeight === null || mindHeight === "0") {
+        //             mindHeight='400';
+        //           }
+        //           mindHeight+='px';
 
-                  const data =await this.app.vault.read(file);
-                  const vm = createApp(SimpleMindMap, { mindFile:file,initMindData: JSON.parse(data),app:this.app,mode:'preview',initElementHeight:mindHeight}).mount(linkEl);   	            
-                }
-              }
-            }
-          }
-        });
+        //           const data =await this.app.vault.read(file);
+        //           const vm = createApp(SimpleMindMap, { mindFile:file,initMindData: JSON.parse(data),app:this.app,mode:'preview',initElementHeight:mindHeight}).mount(linkEl);   	            
+        //         }
+        //       }
+        //     }
+        //   }
+        // });
 
     }
 

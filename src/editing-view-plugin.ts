@@ -39,6 +39,8 @@ export default function EditingViewPlugin(
 				app.workspace.off(EVENT_APP_REFRESH);
 				app.workspace.off('resize');
 				app.workspace.off("css-change")
+				app.workspace.off("quick-preview")
+				app.workspace.off("active-leaf-change")
 				console.log("销毁编辑插件")
 			}
 		}
