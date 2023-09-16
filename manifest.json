@@ -1,0 +1,11 @@
+{
+    "id": "obsidian-vue-sample-plugin",
+    "name": "Obsidian Vue Sample Plugin",
+    "version": "1.0.0",
+    "minAppVersion": "0.15.0",
+    "description": "This is a Vue sample plugin for Obsidian.",
+    "author": "Obsidian",
+    "authorUrl": "https://obsidian.md",
+    "fundingUrl": "https://obsidian.md/pricing",
+    "isDesktopOnly": false
+}
