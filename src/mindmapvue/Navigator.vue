@@ -1,17 +1,17 @@
 <template>
   <div
-    class="navigatorBox"
-    :class="{ isDark: isDark }"
-    :style="{ top: top + 'px', left: left + 'px'}"
-    ref="navigatorBox"
-    @mousedown="onMousedown"
-    @mousemove="onMousemove"
-    @mouseup="onMouseup"
+      class="navigatorBox"
+      :class="{ isDark: isDark }"
+      :style="{ top: top + 'px', left: left + 'px'}"
+      ref="navigatorBox"
+      @mousedown="onMousedown"
+      @mousemove="onMousemove"
+      @mouseup="onMouseup"
   >
     <div
-      class="svgBox"
-      ref="svgBox"
-      :style="{
+        class="svgBox"
+        ref="svgBox"
+        :style="{
         transform: `scale(${svgBoxScale})`,
         left: svgBoxLeft + 'px',
         top: svgBoxTop + 'px'
@@ -22,23 +22,23 @@
 </template>
 
 <script>
-import { inject } from 'vue'
+import {inject} from 'vue'
 
 export default {
   props: {
     mindMap: {
       type: Object
     },
-    app: {            
+    app: {
       required: false
     },
-    contentEl:{
-      required:false
+    contentEl: {
+      required: false
     }
   },
   data() {
     return {
-      isDark:true,
+      isDark: true,
       showMiniMap: true,
       timer: null,
       boxWidth: 0,
@@ -52,12 +52,12 @@ export default {
         bottom: 0,
         right: 0
       },
-      navigatorBoxStyle:{
-        left:0,
-        top:0
+      navigatorBoxStyle: {
+        left: 0,
+        top: 0
       },
-      top:0,
-      left:0,
+      top: 0,
+      left: 0,
       clickCount: 0,         // 点击次数计数器
       clickTimestamps: []   // 点击时间戳数组
     }
@@ -68,16 +68,13 @@ export default {
   mounted() {
     this.init()
 
-    // this.setPosition();
-    // debugger
-    // this.mindMap.on('toggle_mini_map', this.toggle_mini_map)
     this.mindMap.on('data_change', this.data_change)
     this.mindMap.on('view_data_change', this.data_change)
     this.mindMap.on('node_tree_render_end', this.data_change)
 
-    this.app.workspace.on("css-change", () => {            
+    this.app.workspace.on("css-change", () => {
       this.updateTheme()
-    },this.app)
+    }, this.app)
 
   },
   destroyed() {
@@ -112,10 +109,10 @@ export default {
         this.drawMiniMap()
       })
 
-      
+
     },
     init() {
-      let { width, height } = this.$refs.navigatorBox.getBoundingClientRect()
+      let {width, height} = this.$refs.navigatorBox.getBoundingClientRect()
       this.boxWidth = width
       this.boxHeight = height
       this.updateTheme()
@@ -143,7 +140,7 @@ export default {
       //快速点击三次，将root定位到画布中央
       this.handleMouseDown();
       this.mindMap.miniMap.onMousedown(e)
-      
+
     },
 
     onMousemove(e) {
@@ -153,32 +150,32 @@ export default {
     onMouseup(e) {
       this.mindMap.miniMap.onMouseup(e)
     },
-    updateTheme(){
+    updateTheme() {
       const el = document.querySelector("body");
       //是否深色模式
-      if(el?.className.includes("theme-dark") ?? false){
-        this.isDark=true;
-      }else{
-        this.isDark=false;
+      if (el?.className.includes("theme-dark") ?? false) {
+        this.isDark = true;
+      } else {
+        this.isDark = false;
       }
     },
-    setPosition(){
-        // 获取父容器和子元素
-        // const parentElement = this.contentEl.querySelector('[data-type="mufeng-markmind"].workspace-leaf-content')
-        const parentElement = this.contentEl
-        const childElement = this.contentEl.querySelector('#mindMapContainer');
+    setPosition() {
+      // 获取父容器和子元素
+      // const parentElement = this.contentEl.querySelector('[data-type="mufeng-markmind"].workspace-leaf-content')
+      const parentElement = this.contentEl
+      const childElement = this.contentEl.querySelector('#mindMapContainer');
 
-        // 获取子元素相对于父容器的位置信息
-        const parentRect = parentElement.getBoundingClientRect();
-        const childRect = childElement.getBoundingClientRect();
+      // 获取子元素相对于父容器的位置信息
+      const parentRect = parentElement.getBoundingClientRect();
+      const childRect = childElement.getBoundingClientRect();
 
-        const relativeLeft = childRect.left - parentRect.left;
-        const relativeTop = childRect.top - parentRect.top;
+      const relativeLeft = childRect.left - parentRect.left;
+      const relativeTop = childRect.top - parentRect.top;
 
-        this.left=relativeLeft
-        this.top=relativeTop
+      this.left = relativeLeft
+      this.top = relativeTop
     },
-    handleMouseDown(){
+    handleMouseDown() {
       // debugger;
       const currentTime = new Date().getTime();  // 获取当前时间戳
 
@@ -197,17 +194,17 @@ export default {
       }
     },
     handleClickEvent() {
-      console.log('连续三次点击！');
+      // console.log('连续三次点击！');
       // 在这里执行你想触发的特定事件逻辑
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
       // this.mindMap.view.fit()
     }
-  
+
   }
 }
 </script>
 
-<style  lang="less" scoped>
+<style lang="less" scoped>
 .navigatorBox {
   position: absolute;
   width: 150px;

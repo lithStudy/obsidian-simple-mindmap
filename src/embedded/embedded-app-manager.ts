@@ -1,17 +1,15 @@
-import { App, MarkdownView, TFile, WorkspaceLeaf } from "obsidian";
-import { createApp ,App as VueApp} from "vue";
+import {App, MarkdownView, TFile, WorkspaceLeaf} from "obsidian";
+import {createApp, App as VueApp} from "vue";
 import SimpleMindMap from "../mindmapvue/simple-mind-map.vue";
-import { FILE_EXTENSION } from "../constants/constant";
+import {FILE_EXTENSION,EVENT_APP_EMBEDDED_RESIZE} from "../constants/constant";
 
 import {
-	findEmbeddedLoomFile,
-	getEmbeddedLoomLinkEls,
-	getLinkWidth,
-	getLinkHeight,
-	hasLoadedEmbeddedLoom,
+    findEmbeddedLoomFile,
+    getEmbeddedLoomLinkEls,
+    getLinkWidth,
+    getLinkHeight,
+    hasLoadedEmbeddedLoom,
 } from "./embed-utils";
-import _ from "lodash";
-
 /**
  * Iterates through all open markdown leaves and then iterates through all embedded loom links
  * for each leaf and renders a loom for each one.
@@ -19,19 +17,19 @@ import _ from "lodash";
  * @param markdownLeaves - The open markdown leaves
  */
 export const loadPreviewModeApps = (
-	app: App,
-	markdownLeaves: WorkspaceLeaf[],
-	manifestPluginVersion: string
+    app: App,
+    markdownLeaves: WorkspaceLeaf[],
+    manifestPluginVersion: string
 ) => {
-	for (let i = 0; i < markdownLeaves.length; i++) {
-		const leaf = markdownLeaves[i];
+    for (let i = 0; i < markdownLeaves.length; i++) {
+        const leaf = markdownLeaves[i];
 
-		const view = leaf.view as MarkdownView;
-		const mode = view.getMode();
+        const view = leaf.view as MarkdownView;
+        const mode = view.getMode();
 
-		if (mode === "preview")
-			loadEmbeddedLoomApps(app, manifestPluginVersion, leaf, "preview");
-	}
+        if (mode === "preview")
+            loadEmbeddedLoomApps(app, manifestPluginVersion, leaf, "preview");
+    }
 };
 
 /**
@@ -42,17 +40,17 @@ export const loadPreviewModeApps = (
  * @param mode - The mode of the markdown view (source or preview)
  */
 export const loadEmbeddedLoomApps = (
-	app: App,
-	manifestPluginVersion: string,
-	markdownLeaf: WorkspaceLeaf,
-	mode: "source" | "preview"
+    app: App,
+    manifestPluginVersion: string,
+    markdownLeaf: WorkspaceLeaf,
+    mode: "source" | "preview"
 ) => {
-	const view = markdownLeaf.view as MarkdownView;
-	const linkEls = getEmbeddedLoomLinkEls(view, mode);
-	// debugger
-	linkEls.forEach((linkEl) =>
-		processLinkEl(app, manifestPluginVersion, markdownLeaf, linkEl, mode)
-	);
+    const view = markdownLeaf.view as MarkdownView;
+    const linkEls = getEmbeddedLoomLinkEls(view, mode);
+    // debugger
+    linkEls.forEach((linkEl) =>
+        processLinkEl(app, manifestPluginVersion, markdownLeaf, linkEl, mode)
+    );
 };
 
 /**
@@ -74,83 +72,93 @@ export const loadEmbeddedLoomApps = (
  * @returns
  */
 const processLinkEl = async (
-	app: App,
-	manifestPluginVersion: string,
-	leaf: WorkspaceLeaf,
-	linkEl: HTMLElement,
-	mode: "source" | "preview"
+    app: App,
+    manifestPluginVersion: string,
+    leaf: WorkspaceLeaf,
+    linkEl: HTMLElement,
+    mode: "source" | "preview"
 ) => {
-	const DEFAULT_HEIGHT='400px';
-	const DEFAULT_WIDTH='100%';
-	//Set the width and height of the embedded loom
-	//We do this first because if we have already loaded the loom, we stil want
-	//the width and height of the embed to update if the user changes it
+    const DEFAULT_HEIGHT = '400px';
+    const DEFAULT_WIDTH = '100%';
+    //Set the width and height of the embedded loom
+    //We do this first because if we have already loaded the loom, we stil want
+    //the width and height of the embed to update if the user changes it
 
-	// setLinkSize(linkEl);
-	const src = linkEl.getAttribute("src");
-	if(!src){
-		return;
-	}
-	if(!src.endsWith(FILE_EXTENSION)){
-		return;
-	}
-	//If the loom has already been loaded, we don't need to do anything else
-	if (hasLoadedEmbeddedLoom(linkEl)) {
-		// //将mind的容器高度与挂载的dom保持一致，便于自定义高度
-		// if(!linkEl.find('#mindMapContainer')){
-		// 	//mind的容器可能还没渲染好
-		// 	return;
-		// }
-		// let containHeight=DEFAULT_HEIGHT;
-		// if(linkEl.getAttribute("height")!=null){
-		// 	containHeight = linkEl.getAttribute("height")+"px";
-		// }
-		// // let containWidth=DEFAULT_WIDTH;
-		// // if(linkEl.getAttribute("width")!=null){
-		// // 	containWidth = linkEl.getAttribute("width")+"px";
-		// // }
-		
-		// if(containHeight!==linkEl.find('#mindMapContainer').style.height
-		// 	// || containWidth!==linkEl.find('#mindMapContainer').style.width
-		// 	){
-		// 	linkEl.find('#mindMapContainer').style.height=containHeight
+    // setLinkSize(linkEl);
+    const src = linkEl.getAttribute("src");
+    if (!src) {
+        return;
+    }
+    if (!src.endsWith(FILE_EXTENSION)) {
+        return;
+    }
+    //If the loom has already been loaded, we don't need to do anything else
+    if (hasLoadedEmbeddedLoom(linkEl)) {
+        //将mind的容器高度与挂载的dom保持一致，便于自定义高度
+        if(!linkEl.find('#mindMapContainer')){
+        	//mind的容器可能还没渲染好
+        	return;
+        }
+        let containHeight=DEFAULT_HEIGHT;
+        if(linkEl.getAttribute("height")!=null){
+        	containHeight = linkEl.getAttribute("height")+"px";
+        }
+        // let containWidth=DEFAULT_WIDTH;
+        // if(linkEl.getAttribute("width")!=null){
+        // 	containWidth = linkEl.getAttribute("width")+"px";
+        // }
 
-		// 	// linkEl.style.width=containWidth
-		// 	// linkEl.find('#mindMapContainer').style.width=containWidth
-		// 	//TODO 通知remind容器尺寸发生了变化，现在是复用了resize，后面改成自己单独的通知消息类型，并指定需要重置的id，优化效率
-		// 	app.workspace.trigger('resize')
-		// }
-		return;
-	}
-	
+        if(containHeight!==linkEl.find('#mindMapContainer').style.height
+        	// || containWidth!==linkEl.find('#mindMapContainer').style.width
+        	){
+        	linkEl.find('#mindMapContainer').style.height=containHeight
 
-	const sourcePath = (leaf.view as MarkdownView).file?.path ?? "";
-	const file = findEmbeddedLoomFile(app, linkEl, sourcePath);
-	if (!file) return;
+        	// linkEl.style.width=containWidth
+        	// linkEl.find('#mindMapContainer').style.width=containWidth
+        	//TODO 通知remind容器尺寸发生了变化
+        	app.workspace.trigger(EVENT_APP_EMBEDDED_RESIZE,leaf)
+        }
+        return;
+    }
 
-	resetLinkStyles(linkEl);
 
-	//Create a container
-	const containerEl = renderContainerEl(linkEl);
+    const sourcePath = (leaf.view as MarkdownView).file?.path ?? "";
+    const file = findEmbeddedLoomFile(app, linkEl, sourcePath);
+    if (!file) return;
 
-	let mindHeight =  linkEl.getAttribute("height");
-	// debugger;
-	if (mindHeight === null || mindHeight === "0") {
-		mindHeight='400';
-	}
-	
-	mindHeight+='px';
+    resetLinkStyles(linkEl);
 
-	//Get the loom state
-	const data = await app.vault.read(file);
-	// debugger;
-	// console.log(data)
-	const viewId = Math.random();   
-	const vm = createApp(SimpleMindMap, { leaf:leaf,viewId:viewId,mindFile:file,initMindData: JSON.parse(data),app:app,mode:'edit',initElementHeight:mindHeight,showMiniMap:false,contentEl:containerEl}).mount(containerEl);   	
-	const markMind=vm.$data.markMind; 
+    //Create a container
+    const containerEl = renderContainerEl(linkEl);
+
+    let mindHeight = linkEl.getAttribute("height");
+    // debugger;
+    if (mindHeight === null || mindHeight === "0") {
+        mindHeight = '400';
+    }
+
+    mindHeight += 'px';
+
+    //Get the loom state
+    const data = await app.vault.read(file);
+    // debugger;
+    // console.log(data)
+    const mindContainerId = Math.random();
+    const vm = createApp(SimpleMindMap, {
+        leaf: leaf,
+        mindContainerId: mindContainerId,
+        mindFile: file,
+        initMindData: JSON.parse(data),
+        app: app,
+        mode: 'embedded-edit',
+        initElementHeight: mindHeight,
+        showMiniMap: false,
+        showMindTools: true,
+        contentEl: containerEl
+    }).mount(containerEl);
+    const markMind = vm.$data.markMind;
 
 }
-
 
 
 /**
@@ -159,21 +167,21 @@ const processLinkEl = async (
  * @param linkEl - The link element that contains the embedded loom
  */
 const renderContainerEl = (linkEl: HTMLElement) => {
-	const containerEl = linkEl.createDiv({
-		cls: "mufeng-mind-embedded-container",
-	});
-	// containerEl.style.height = "100%";
-	// containerEl.style.width = "100%";
-	// containerEl.style.height = "800px";
-	containerEl.style.width = "100%";
-	containerEl.style.padding = "10px 0px";
+    const containerEl = linkEl.createDiv({
+        cls: "mufeng-mind-embedded-container",
+    });
+    // containerEl.style.height = "100%";
+    // containerEl.style.width = "100%";
+    // containerEl.style.height = "800px";
+    containerEl.style.width = "100%";
+    containerEl.style.padding = "10px 0px";
 
-	//Stop propagation of the click event. We do this so that the embed link
-	//doesn't navigate to the linked file when clicked
-	containerEl.addEventListener("click", (e) => {
-		e.stopPropagation();
-	});
-	return containerEl;
+    //Stop propagation of the click event. We do this so that the embed link
+    //doesn't navigate to the linked file when clicked
+    containerEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+    });
+    return containerEl;
 };
 
 /**
@@ -182,14 +190,14 @@ const renderContainerEl = (linkEl: HTMLElement) => {
  * @param linkEl - The link element that contains the embedded loom
  */
 const resetLinkStyles = (linkEl: HTMLElement) => {
-	//Clear default Obsidian placeholder content
-	linkEl.empty();
+    //Clear default Obsidian placeholder content
+    linkEl.empty();
 
-	//Reset styles
-	linkEl.style.backgroundColor = "var(--color-primary)";
-	linkEl.style.cursor = "unset";
-	linkEl.style.margin = "0px";
-	linkEl.style.padding = "0px";
+    //Reset styles
+    linkEl.style.backgroundColor = "var(--color-primary)";
+    linkEl.style.cursor = "unset";
+    linkEl.style.margin = "0px";
+    linkEl.style.padding = "0px";
 };
 
 /**
@@ -202,11 +210,11 @@ const resetLinkStyles = (linkEl: HTMLElement) => {
  * @param linkEl - The link element that contains the embedded loom
  */
 const setLinkSize = (linkEl: HTMLElement) => {
-	// const { defaultEmbedWidth, defaultEmbedHeight } =
-	// 	store.getState().global.settings;
+    // const { defaultEmbedWidth, defaultEmbedHeight } =
+    // 	store.getState().global.settings;
 
-	const width = getLinkWidth(linkEl, '100%');
-	const height = getLinkHeight(linkEl, '100%');
-	linkEl.style.width = width;
-	linkEl.style.height = height;
+    const width = getLinkWidth(linkEl, '100%');
+    const height = getLinkHeight(linkEl, '100%');
+    linkEl.style.width = width;
+    linkEl.style.height = height;
 };

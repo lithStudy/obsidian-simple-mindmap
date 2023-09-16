@@ -21,5 +21,6 @@ export const EXTENSION_REGEX = new RegExp(/\.[a-z]*$/);
 export const WIKI_LINK_REGEX = new RegExp(/\[\[([^|\]]+)(?:\|([\w-]+))?\]\]/g);
 
 export const EVENT_APP_REFRESH = "mufeng-mind-refresh"
+export const EVENT_APP_EMBEDDED_RESIZE="mufeng-mind-embedded-resize"
 
-export const MARKMIND_DEFAULT_DATA='{"data": {"text": "根节点"},"children": []}'
+export const MARKMIND_DEFAULT_DATA = {"data": {"text": "根节点"}, "children": []}
