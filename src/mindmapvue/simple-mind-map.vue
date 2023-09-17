@@ -242,7 +242,7 @@ export default defineComponent({
           data: mydata.mindMapData
         });
 
-        const textEdit = new TextEdit(mindMap.renderer)
+        const textEdit = mindMap.renderer.textEdit
         mindMap.keyCommand.addShortcut('Spacebar', () => {
           console.log("触发空格")
           if (mindMap.renderer.activeNodeList.length <= 0) {
