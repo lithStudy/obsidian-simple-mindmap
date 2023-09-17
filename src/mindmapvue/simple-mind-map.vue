@@ -46,6 +46,8 @@ import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} fro
 import _ from "lodash";
 import Navigator from 'Navigator.vue'
 import MindTools from 'Tools.vue'
+import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
+import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
 
 
 const THROTTLE_TIME_MILLIS = 3000;
@@ -120,6 +122,13 @@ export default defineComponent({
       if (heightTemp <= 0 || widthTemp <= 0) {
         return;
       }
+      // debugger
+
+      //计算尺寸变更后的容器大小
+      const paddingTop = parseFloat(getComputedStyle(props.contentEl).paddingTop);
+      const paddingBottom = parseFloat(getComputedStyle(props.contentEl).paddingBottom);
+      let heightWithoutPadding = props.contentEl.clientHeight - paddingTop - paddingBottom;
+      mydata.initHeight=heightWithoutPadding+"px";
       //重置思维导图尺寸
       mindResizeAndCenter();
 
@@ -144,8 +153,6 @@ export default defineComponent({
     mydata.compId = Math.random();
     mydata.initHeight = props.initElementHeight
 
-    // const mindMapContainerRef = ref(null);
-    const showMiniMap = ref(true);
 
     const goTargetRoot = () => {
       mindMap.execCommand('GO_TARGET_NODE', mindMap.renderer.root, () => {
@@ -235,6 +242,14 @@ export default defineComponent({
           data: mydata.mindMapData
         });
 
+        const textEdit = new TextEdit(mindMap.renderer)
+        mindMap.keyCommand.addShortcut('Spacebar', () => {
+          console.log("触发空格")
+          if (mindMap.renderer.activeNodeList.length <= 0) {
+            return
+          }
+          textEdit.show(mindMap.renderer.activeNodeList[0])
+        })
 
         mindMap.on('node_tree_render_end', (...args) => {
           // updateMiniMap();

@@ -70,7 +70,7 @@ export default {
     setPosition(){
         // 获取父容器和子元素
         // const parentElement = this.contentEl.querySelector('[data-type="mufeng-markmind"].workspace-leaf-content')
-        const parentElement = this.contentEl
+        const parentElement = this.contentEl.parentElement
         const childElement = this.contentEl.querySelector('#mindMapContainer');
 
         // 获取子元素相对于父容器的位置信息
@@ -111,9 +111,10 @@ export default {
     padding-left: 10px;
     padding-right:10px;
     float: left;
-    width: 60px;
-    line-height: 40px;
+    width: 50px;
+    line-height: 25px;
     text-align:center;
+    font-size: small;
     border-radius: 4px;
     border: 1px solid #eee;
   }
