@@ -6,7 +6,7 @@
     ref="mindToolsBox"
   >
     <div @click="resize()" class="toolsButton">重置</div>
-    <div class="toolsButton">备注</div>
+    <div @click="remark()" class="toolsButton">备注</div>
   </div>
 </template>
 
@@ -57,6 +57,12 @@ export default {
       // console.log("定位根节点")
       this.mindMap.resize();
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
+    },
+    remark(){
+      if (this.mindMap.renderer.activeNodeList.length <= 0) {
+        return
+      }
+      this.mindMap.renderer.activeNodeList[0].setNote('备注内容')
     },
     updateTheme(){
       const el = document.querySelector("body");
