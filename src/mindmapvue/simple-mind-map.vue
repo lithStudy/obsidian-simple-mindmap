@@ -3,7 +3,7 @@
     <!--<span>{{mydata.compId}}</span>-->
     <div id="mindMapContainer" :style="{ height: mydata.initHeight,width:mydata.mindMapContainerWidth }"></div>
     <div id="miniMap" v-if="showMiniMap"></div>
-    <div id="mindTools" v-if="showMindTools"></div>
+    <div id="mindTools" v-if="showMindTools" @remakModelToggle="remakModelToggle"></div>
     <NodeNoteContentShow :app="app" :mindMap="mindMap" :contentEl="contentEl" v-if="noteMode != 'slide'"></NodeNoteContentShow>
     <div id="node" v-if="noteMode === 'slide'">
       <div id="remarkDiv" class="remarkDiv" :style="{ height: mydata.initHeight }">
@@ -99,7 +99,9 @@ export default defineComponent({
 
 
 
-
+    const remakModelToggle=()=>{
+      console.log('remakModelToggle');
+    }
 
     const mindResizeAndCenter = () => {
       // console.log("定位根节点")
@@ -390,6 +392,7 @@ export default defineComponent({
       handleRefreshEvent,
       mindMap,
       goTargetRoot,
+      remakModelToggle,
     };
   },
   beforeDestroy() {

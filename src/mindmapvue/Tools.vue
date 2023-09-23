@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { inject } from 'vue'
+import { useEmitter  } from 'vue'
 
 export default {
   props: {
@@ -79,13 +79,15 @@ export default {
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
     },
     remark(){
-      this.showRemark = !this.showRemark;
-      if(this.showRemark){
-        if (this.mindMap.renderer.activeNodeList.length <= 0) {
-          return
-        }
-        this.remarkContent=this.mindMap.renderer.activeNodeList[0].getData('note')
-      }
+      console.log("点击备注按钮")
+      this.$emit('remakModelToggle', '新的值');
+      // this.showRemark = !this.showRemark;
+      // if(this.showRemark){
+      //   if (this.mindMap.renderer.activeNodeList.length <= 0) {
+      //     return
+      //   }
+      //   this.remarkContent=this.mindMap.renderer.activeNodeList[0].getData('note')
+      // }
     },
     saveRemark(){
       if (this.mindMap.renderer.activeNodeList.length <= 0) {
