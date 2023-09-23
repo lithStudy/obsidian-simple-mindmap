@@ -1,8 +1,7 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { createApp ,App as VueApp} from "vue";
-// import SampleSettingTabPage from "./SettingTabPage.vue";
+import SampleSettingTabPage from "./SettingTabPage.vue";
 import MindMap from "simple-mind-map";
-import Remark from "./mindmapvue/Remark.vue"
 
 export const VIEW_TYPE_EXAMPLE = "example-view";
 
@@ -25,8 +24,9 @@ export class ExampleView extends ItemView {
     container.empty();
     const div1 = container.createEl("div", { cls: "book" });
 
-    const app = createApp(Remark,{})
-    app.mount(div1)
+    // const app = createApp(Remark,{})
+    // app.mount(div1)
+
 
   }
 

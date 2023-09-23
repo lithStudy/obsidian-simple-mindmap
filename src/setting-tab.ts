@@ -6,7 +6,7 @@
 import { App, PluginSettingTab } from "obsidian";
 import { createApp } from "vue";
 import SamplePlugin from "./main";
-// import SampleSettingTabPage from "./SettingTabPage.vue";
+// import NodeEdit from "./mindmapvue/NodeEdit";
 
 /**
  * The plugin setting-tab.
@@ -55,6 +55,6 @@ export class SampleSettingTab extends PluginSettingTab {
          * 
          * 挂载 `SampleSettingTabPage` 组件.
          */
-        // createApp(SampleSettingTabPage).mount(containerEl);
+        createApp(NodeEdit).mount(containerEl);
     }
 }

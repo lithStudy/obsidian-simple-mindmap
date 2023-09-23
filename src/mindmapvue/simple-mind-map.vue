@@ -1,28 +1,18 @@
 <template>
   <div>
     <!--<span>{{mydata.compId}}</span>-->
-    <div id="mindMapContainer" :style="{ height: mydata.initHeight }"></div>
+    <div id="mindMapContainer" :style="{ height: mydata.initHeight,width:mydata.mindMapContainerWidth }"></div>
     <div id="miniMap" v-if="showMiniMap"></div>
     <div id="mindTools" v-if="showMindTools"></div>
+    <NodeNoteContentShow :app="app" :mindMap="mindMap" :contentEl="contentEl" v-if="noteMode != 'slide'"></NodeNoteContentShow>
+    <div id="node" v-if="noteMode === 'slide'">
+      <div id="remarkDiv" class="remarkDiv" :style="{ height: mydata.initHeight }">
+        <textarea id="nodeNote" v-model="remarkContent" class="remarkTextarea">111</textarea>
+      </div>
+    </div>
 
   </div>
 </template>
-
-<style scoped>
-/* @import "./simpleMindMap.esm.css"; */
-
-#mindMapContainer {
-  width: 100%;
-  /* min-height: 400px; */
-  /* height: 100%; */
-  /* height: 2000px; */
-}
-
-#mindMapContainer * {
-  margin: 0;
-  padding: 0;
-}
-</style>
 
 <script lang="ts">
 import {
@@ -46,6 +36,7 @@ import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} fro
 import _ from "lodash";
 import Navigator from 'Navigator.vue'
 import MindTools from 'Tools.vue'
+import NodeNoteContentShow from 'NodeNoteContentShow.vue'
 import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
 import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
 
@@ -56,7 +47,8 @@ export default defineComponent({
   name: "SampleSettingTabPage",
   components: {
     Navigator,
-    MindTools
+    MindTools,
+    NodeNoteContentShow
   },
   // props: ['mindFile','initMindData','app','mode','initElementHeight'],
   props: {
@@ -75,6 +67,9 @@ export default defineComponent({
     //embedded-edit、edit、preview
     mode: {
       required: false
+    },
+    noteMode:{
+      required:false
     },
     initElementHeight: {
       required: false
@@ -95,13 +90,15 @@ export default defineComponent({
     }
   },
   setup(props) {
-
     // let mindMap = ref({})
     // provide('mindMap', mindMap);
 
     let mindMap = null;
 
     let el_temp = null;
+
+
+
 
 
     const mindResizeAndCenter = () => {
@@ -135,6 +132,7 @@ export default defineComponent({
     }
 
 
+
     console.log("aaaaa-----initElementHeight:" + props.initElementHeight)
 
     // const message = ref(props.initMindData)
@@ -148,7 +146,8 @@ export default defineComponent({
       compId: 0.0,
       mindMode: 'edit',
       mindTheme: 'dark',
-      initHeight: '1000px'
+      initHeight: '1000px',
+      mindMapContainerWidth:'100%'
     })
     mydata.compId = Math.random();
     mydata.initHeight = props.initElementHeight
@@ -160,6 +159,17 @@ export default defineComponent({
         // this.notHandleDataChange = false
       })
     }
+
+    const saveNote=()=>{
+      if (mindMap.renderer.activeNodeList.length <= 0) {
+        return
+      }
+      mindMap.renderer.activeNodeList[0].setNote(props.contentEl.querySelector('#nodeNote').value);
+    }
+
+    const throttleSaveNote = _.throttle(() => {
+      saveNote();
+    }, THROTTLE_TIME_MILLIS);
 
     const handleRefreshEvent = (newCompId, newMindData, newFilePath) => {
       console.log("准备刷新：" + mydata.compId)
@@ -191,11 +201,19 @@ export default defineComponent({
       props.app.workspace.off("css-change")
       props.app.workspace.off("quick-preview")
       props.app.workspace.off("active-leaf-change")
+
+      props.app.workspace.off("showNoteContent")
+      props.app.workspace.off("hideNoteContent")
+      // props.app.workspace.off("node_active")
     }
 
 
     // 在组件挂载时调用 updateMiniMap 函数
     onMounted(() => {
+      if(props.noteMode==='slide'){
+        mydata.mindMapContainerWidth='80%';
+
+      }
       //节流保存数据
       const throttleSave = _.throttle((mindDataTempParam: {}) => {
         //保存文件
@@ -239,7 +257,15 @@ export default defineComponent({
           readonly: mydata.mindMode === 'preview' ? true : false,
           // initRootNodePosition: ['center', 'center'],
           mousewheelAction: 'move',// zoom（放大缩小）、move（上下移动）
-          data: mydata.mindMapData
+          data: mydata.mindMapData,
+          customNoteContentShow: {
+            show: (content, left, top) => {
+              props.app.workspace.trigger('showNoteContent', content, left, top)
+            },
+            hide: () => {
+              // this.$bus.$emit('hideNoteContent')
+            }
+          },
         });
 
         const textEdit = mindMap.renderer.textEdit
@@ -270,6 +296,27 @@ export default defineComponent({
           console.log("样式调整mindMap.renderer.moveNodeToCenter(mindMap.renderer.root)")
           mindMap.renderer.moveNodeToCenter(mindMap.renderer.root)
         })
+
+        let nodeNoteEl = props.contentEl.querySelector('#nodeNote');
+        mindMap.on("node_active",(node)=>{
+          if (!node) {
+            return
+          }
+
+          if (nodeNoteEl) {
+            nodeNoteEl.value=node.getData('note');
+          }
+        })
+
+        if (nodeNoteEl) {
+          nodeNoteEl.addEventListener('input', function(event) {
+            console.log("监听input")
+            // throttleSaveNote();
+            saveNote();
+            // 处理输入事件，使用获取到的 value ...
+          });
+
+        }
 
         //监听刷新事件，刷新视图
         props.app.workspace.on(
@@ -352,3 +399,51 @@ export default defineComponent({
 
 })
 </script>
+
+<style scoped>
+/* @import "./simpleMindMap.esm.css"; */
+
+#mindMapContainer {
+  width: 80%;
+  float: left;
+  /* min-height: 400px; */
+  /* height: 100%; */
+  /* height: 2000px; */
+}
+
+#mindMapContainer * {
+  margin: 0;
+  padding: 0;
+}
+
+#node{
+  width: 20%;
+  float: left;
+}
+
+.remarkDiv{
+  /*position: absolute;*/
+  /*background-color: #fff;*/
+  /*top: 40px;*/
+  /*right: 20px;*/
+  cursor: pointer;
+  user-select: none;
+
+  .remarkTextarea{
+    height: 100%;
+    width: 100%
+  }
+  .remarkButton{
+  /*margin-left: 10px;*/
+    padding-left: 10px;
+    padding-right:10px;
+    float: left;
+    width: 50px;
+    line-height: 25px;
+    text-align:center;
+    font-size: small;
+    border-radius: 4px;
+    border: 1px solid #eee;
+  }
+}
+</style>

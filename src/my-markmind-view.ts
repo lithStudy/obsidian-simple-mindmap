@@ -76,6 +76,7 @@ export class MufengMakrMindView extends TextFileView {
                     initMindData: this.markMindData,
                     app: this.app,
                     mode: 'edit',
+                    noteMode:'slide',
                     initElementHeight: heightWithoutPadding +"px",
                     showMiniMap: true,
                     showMindTools:true,
@@ -101,7 +102,6 @@ export class MufengMakrMindView extends TextFileView {
 
     //
     setViewData(data: string, clear: boolean) {
-        // console.log("setViewData:" + data)
         this.markMindData = JSON.parse(data);
 
         //clear为true，说明正在打开另一个文件
@@ -112,10 +112,6 @@ export class MufengMakrMindView extends TextFileView {
             }
             console.log('gggggggggggggg');
             this.initMind();
-            // this.app.workspace.onLayoutReady(() => {
-            //
-            // })
-
         }
 
     }

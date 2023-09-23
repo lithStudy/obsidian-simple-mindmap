@@ -1,13 +1,22 @@
 <template>
-  <div
-    class="mindToolsBox"
-    :class="{ isDark: isDark }"
-    :style="{ top: top + 'px', right: right + 'px'}"
-    ref="mindToolsBox"
-  >
-    <div @click="resize()" class="toolsButton">重置</div>
-    <div @click="remark()" class="toolsButton">备注</div>
+  <div>
+    <div
+        class="mindToolsBox"
+        :class="{ isDark: isDark }"
+        :style="{ top: top + 'px', right: right + 'px'}"
+        ref="mindToolsBox"
+    >
+      <div @click="resize()" class="toolsButton">重定位</div>
+      <div @click="remark()" class="toolsButton">备注</div>
+    </div>
+<!--    <div id="remarkDiv" class="remarkDiv" v-if="showRemark"-->
+<!--         :class="{ isDark: isDark }"-->
+<!--         :style="{ top: remarkTop + 'px', right: remarkRight + 'px'}">-->
+<!--      <textarea v-model="remarkContent" class="remarkTextarea">111</textarea>-->
+<!--      <div @click="saveRemark()" class="remarkButton">保存</div>-->
+<!--    </div>-->
   </div>
+
 </template>
 
 <script>
@@ -34,6 +43,10 @@ export default {
       boxHeight: 0,
       top:0,
       right:0,
+      remarkTop:0,
+      remarkRight:0,
+      showRemark:true,
+      remarkContent:"",
       clickCount: 0,         // 点击次数计数器
       clickTimestamps: []   // 点击时间戳数组
     }
@@ -48,6 +61,13 @@ export default {
       this.updateTheme()
     },this.app)
 
+    // this.mindMap.on("node_active",(node)=>{
+    //   if (!node) {
+    //     return
+    //   }
+    //   this.remarkContent=node.getData('note');
+    // })
+
   },
   destroyed() {
     this.app.workspace.off("css-change");
@@ -59,10 +79,19 @@ export default {
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
     },
     remark(){
+      this.showRemark = !this.showRemark;
+      if(this.showRemark){
+        if (this.mindMap.renderer.activeNodeList.length <= 0) {
+          return
+        }
+        this.remarkContent=this.mindMap.renderer.activeNodeList[0].getData('note')
+      }
+    },
+    saveRemark(){
       if (this.mindMap.renderer.activeNodeList.length <= 0) {
         return
       }
-      this.mindMap.renderer.activeNodeList[0].setNote('备注内容')
+      this.mindMap.renderer.activeNodeList[0].setNote(this.remarkContent)
     },
     updateTheme(){
       const el = document.querySelector("body");
@@ -88,6 +117,8 @@ export default {
 
         this.right=relativeRight
         this.top=relativeTop
+        this.remarkTop = this.top
+      this.remarkRight = this.right+130
     },
 
   }
@@ -97,15 +128,9 @@ export default {
 <style  lang="less" scoped>
 .mindToolsBox {
   position: absolute;
-  //width: 150px;
-  //height: 100px;
   background-color: #fff;
-  // bottom: 80px;
-  // right: 70px;
   top: 10px;
   right: 20px;
-  //box-shadow: 0 0 16px #989898;
-
   cursor: pointer;
   user-select: none;
 
@@ -113,6 +138,31 @@ export default {
     background-color: #262a2e;
   }
   .toolsButton{
+    //margin-left: 10px;
+    padding-left: 10px;
+    padding-right:10px;
+    float: left;
+    width: 80px;
+    line-height: 30px;
+    text-align:center;
+    font-size: small;
+    border-radius: 4px;
+    border: 1px solid #eee;
+  }
+}
+.remarkDiv{
+  position: absolute;
+  //background-color: #fff;
+  top: 40px;
+  right: 20px;
+  cursor: pointer;
+  user-select: none;
+
+  .remarkTextarea{
+    height: 100px;
+    width: 400px;
+  }
+  .remarkButton{
     //margin-left: 10px;
     padding-left: 10px;
     padding-right:10px;

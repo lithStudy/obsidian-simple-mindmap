@@ -43,6 +43,10 @@ export default function EditingViewPlugin(
                 app.workspace.off("css-change")
                 app.workspace.off("quick-preview")
                 app.workspace.off("active-leaf-change")
+
+                app.workspace.off("showNoteContent")
+                app.workspace.off("hideNoteContent")
+                app.workspace.off("node_active")
                 console.log("销毁编辑插件")
             }
         }
