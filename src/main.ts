@@ -9,16 +9,38 @@ import {
     TFile,
     TFolder,
     ViewState,
-    MarkdownView
+    MarkdownView,
+    normalizePath,
 } from 'obsidian';
 import {SampleSettingTab} from "./setting-tab";
 import {ExampleView, VIEW_TYPE_EXAMPLE} from "./test-view";
-import {MufengMakrMindView, MUFENG_MARKMIND_VIEW} from "./my-markmind-view"
+import {MufengMindMapView, MUFENG_MARKMIND_VIEW} from "./my-markmind-view"
 import EditingViewPlugin from "./editing-view-plugin";
 import {getEmbeddedLoomLinkEls, findEmbeddedLoomFile} from "./embedded/embed-utils"
 import {createApp, App as VueApp} from "vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
 import {FILE_EXTENSION} from "./constants/constant";
+import {createMindMapFile} from "./utils/loom-file";
+import {getBasename} from "./utils/link-utils";
+
+
+export interface MindSettings {
+    createAtObsidianAttachmentFolder: boolean;
+    customFolderForNewFiles: string;
+    removeMarkdownOnExport: boolean;
+    defaultEmbedWidth: string;
+    defaultEmbedHeight: string;
+    defaultInitData:string;
+}
+
+export const DEFAULT_SETTINGS: MindSettings = {
+    createAtObsidianAttachmentFolder: true,
+    customFolderForNewFiles: "",
+    removeMarkdownOnExport: true,
+    defaultEmbedWidth: "100%",
+    defaultEmbedHeight: "340px",
+    defaultInitData:'{"data": {"text": "根节点"}, "children": []}',
+};
 
 /**
  * The plugin.
@@ -32,6 +54,8 @@ import {FILE_EXTENSION} from "./constants/constant";
 export default class SamplePlugin extends Plugin {
     mindmapFileModes: { [file: string]: string } = {};
 
+    settings: MindSettings;
+
     /**
      * This method runs when the plugin is enabled or updated.
      *
@@ -41,7 +65,11 @@ export default class SamplePlugin extends Plugin {
      *
      * 这将是您设置插件大部分功能的地方.
      */
-    onload() {
+    async onload() {
+        /**
+         * 加载配置
+         */
+        await this.loadSettings();
         /**
          * Register the plugin setting-tab.
          *
@@ -61,7 +89,7 @@ export default class SamplePlugin extends Plugin {
 
         this.registerView(
             MUFENG_MARKMIND_VIEW,
-            (leaf) => new MufengMakrMindView(leaf, this.manifest.id, this.manifest.version)
+            (leaf) => new MufengMindMapView(leaf, this.manifest.id, this.manifest.version)
         );
         //注册打开特定扩展名的视图
         this.registerExtensions(["mind"], MUFENG_MARKMIND_VIEW);
@@ -70,24 +98,8 @@ export default class SamplePlugin extends Plugin {
             this.activateTestView();
         });
 
-        //添加命令：切换导图模式与源码模式
-        this.addCommand({
-            id: 'Toggle',
-            name: 'Toggle markdown/mindmap',
-            mobileOnly: false,
-            callback: () => {
-                const mindmapView = this.app.workspace.getActiveViewOfType(MufengMakrMindView);
-                const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-                // console.log('markdownView:'+markdownView)
-                if (mindmapView != null) {
-                    // this.mindmapFileModes[(mindmapView.leaf as any).id || mindmapView.file.path] = 'markdown';
-                    this.setMarkdownView(mindmapView.leaf);
-                } else if (markdownView != null) {
-                    // this.mindmapFileModes[(markdownView.leaf as any).id || markdownView.file.path] = MUFENG_MARKMIND_VIEW;
-                    this.setMindMapView(markdownView.leaf);
-                }
-            }
-        });
+        //注册命令
+        this.registerCommands();
 
         //注册编辑器扩展
         this.registerEditorExtension(
@@ -186,5 +198,150 @@ export default class SamplePlugin extends Plugin {
         } as ViewState);
     }
 
+    registerCommands() {
+        this.addCommand({
+            id: "create",
+            name: "Create mindMap",
+            hotkeys: [{ modifiers: ["Mod", "Shift"], key: "=" }],
+            callback: async () => {
+                await this.newMindMapFile(null);
+            },
+        });
+
+        this.addCommand({
+            id: "create-and-embed",
+            name: "Create mindMap and embed it into current file",
+            hotkeys: [{ modifiers: ["Mod", "Shift"], key: "+" }],
+            editorCallback: async (editor) => {
+                const filePath = await this.newMindMapFile(null, true);
+                if (!filePath) return;
+
+                const useMarkdownLinks = (this.app.vault as any).getConfig(
+                    "useMarkdownLinks"
+                );
+
+                // Use basename rather than whole name when using Markdownlink like ![abcd](abcd.loom) instead of ![abcd.loom](abcd.loom)
+                // It will replace `.loom` to "" in abcd.loom
+                const linkText = useMarkdownLinks
+                    ? `![${getBasename(filePath)}](${encodeURI(filePath)})`
+                    : `![[${filePath}]]`;
+
+                editor.replaceRange(linkText, editor.getCursor());
+                editor.setCursor(
+                    editor.getCursor().line,
+                    editor.getCursor().ch + linkText.length
+                );
+            },
+        });
+
+        this.addCommand({
+            id: "export-markdown",
+            name: "Export as markdown",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                const markdownView =
+                    this.app.workspace.getActiveViewOfType(MarkdownView);
+                if (loomView || markdownView) {
+                    if (!checking) {
+                        this.app.workspace.trigger(EVENT_DOWNLOAD_MARKDOWN);
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+
+        //添加命令：切换导图模式与源码模式
+        this.addCommand({
+            id: 'Toggle',
+            name: 'Toggle markdown/mindmap',
+            mobileOnly: false,
+            callback: () => {
+                const mindmapView = this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+                // console.log('markdownView:'+markdownView)
+                if (mindmapView != null) {
+                    // this.mindmapFileModes[(mindmapView.leaf as any).id || mindmapView.file.path] = 'markdown';
+                    this.setMarkdownView(mindmapView.leaf);
+                } else if (markdownView != null) {
+                    // this.mindmapFileModes[(markdownView.leaf as any).id || markdownView.file.path] = MUFENG_MARKMIND_VIEW;
+                    this.setMindMapView(markdownView.leaf);
+                }
+            }
+        });
+
+    }
+
+    private getFolderForNewLoomFile(contextMenuFolderPath: string | null) {
+        let folderPath = "";
+
+        if (contextMenuFolderPath) {
+            folderPath = contextMenuFolderPath;
+        }
+        //不指定文件夹时，如果设置中的自定义文件夹路径不为空，就放在自定义文件夹中
+        else if (this.settings.customFolderForNewFiles){
+            folderPath = this.settings.customFolderForNewFiles;
+        }
+        //如果自定义文件夹为空（没有设置），如果配置中允许使用系统附件文件夹，放在系统文件夹
+        else if (this.settings.createAtObsidianAttachmentFolder) {
+            folderPath = (this.app.vault as any).getConfig(
+                "attachmentFolderPath"
+            );
+        } else {
+            // folderPath = this.settings.customFolderForNewFiles;
+
+        }
+        const normalized = normalizePath(folderPath);
+        if (normalized === ".") return "/";
+        return normalized;
+    }
+
+    private async newMindMapFile(
+        contextMenuFolderPath: string | null,
+        embedded?: boolean
+    ) {
+        const folderPath = this.getFolderForNewLoomFile(contextMenuFolderPath);
+        const filePath = await createMindMapFile(
+            this.app,
+            folderPath,
+            this.manifest.version,
+            this.settings.defaultInitData
+        );
+
+        //If the file is embedded, we don't need to open it
+        if (embedded) return filePath;
+
+        //Open file in a new tab and set it to active
+        await app.workspace.getLeaf(true).setViewState({
+            type: MUFENG_MARKMIND_VIEW,
+            active: true,
+            state: { file: filePath },
+        });
+    }
+
+    // async loadSettings() {
+    //     this.settings = Object.assign(
+    //         {},
+    //         DEFAULT_SETTINGS,
+    //         // await this.loadData()
+    //         null
+    //     );
+    //     // store.dispatch(setSettings({ ...this.settings }));
+    // }
+
+    async loadSettings() {
+        this.settings = Object.assign(
+            {},
+            DEFAULT_SETTINGS,
+            await this.loadData()
+        );
+        // store.dispatch(setSettings({ ...this.settings }));
+    }
+
+    async saveSettings() {
+        await this.saveData(this.settings);
+        // store.dispatch(setSettings({ ...this.settings }));
+    }
 
 }

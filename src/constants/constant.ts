@@ -5,7 +5,7 @@ export const FILE_EXTENSION = "mind";
 /**
  * Matches an extension with a leading period.
  * @example
- * .loom
+ * .mind
  */
 export const EXTENSION_REGEX = new RegExp(/\.[a-z]*$/);
 
