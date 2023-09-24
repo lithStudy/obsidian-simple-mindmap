@@ -8,7 +8,7 @@ import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} fro
 export const MUFENG_MARKMIND_VIEW = "mufeng-markmind";
 
 
-export class MufengMakrMindView extends TextFileView {
+export class MufengMindMapView extends TextFileView {
     private viewId: number;
     private pluginId: string;
     private pluginVersion: string;

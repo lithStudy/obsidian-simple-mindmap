@@ -3,10 +3,8 @@
  * 
  * 导入模块.
  */
-import { App, PluginSettingTab } from "obsidian";
-import { createApp } from "vue";
+import { App, PluginSettingTab,Setting  } from "obsidian";
 import SamplePlugin from "./main";
-// import NodeEdit from "./mindmapvue/NodeEdit";
 
 /**
  * The plugin setting-tab.
@@ -45,16 +43,26 @@ export class SampleSettingTab extends PluginSettingTab {
     display() {
         /**
          * To achieve the effect of refreshing, the content of the plugin setting-tab must be cleared each time before building a new one.
-         * 
+         *
          * 为了实现刷新的效果, 每次在构建新的插件设置页之前都必须先清空其内容.
          */
         const { containerEl } = this;
         containerEl.empty();
+
         /**
-         * Mount the `SampleSettingTabPage` component.
-         * 
-         * 挂载 `SampleSettingTabPage` 组件.
+         * new Setting(containerEl) 方法向容器标签中添加一个设置。本例通过 addText() 方法使用文本字段，但也有其他几种可用的设置类型。
          */
-        createApp(NodeEdit).mount(containerEl);
+        new Setting(containerEl)
+            .setName("思维导图文件夹")
+            .setDesc("默认为系统附件文件夹")
+            .addText((text) =>
+                text
+                    .setPlaceholder("附件/思维导图")
+                    .setValue(this.plugin.settings.customFolderForNewFiles)
+                    .onChange(async (value) => {
+                        this.plugin.settings.customFolderForNewFiles = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
     }
 }

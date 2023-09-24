@@ -1,20 +1,14 @@
-<br />
+首先感谢并推荐此思维导图开源项目：https://github.com/wanglin2/mind-map
 
-[![splash.png]][splash.png.github]
-
-[![obsidian.shield]]() [![typescript.shield]]() [![vue.shield]]() [![esbuild.shield]]() <br />
-[![status.shield]]() [![license.shield]]()
-
-[English] • [简体中文] &#x1F54A;&#xFE0F;
-
-<br />
-
+本项目只是站在巨人的肩膀上做了集成，一方面是个人喜欢这个思维导图项目，另一方面也希望向大家推荐它
 # 介绍
-
 本项目是一种obsidian的思维导图插件
 ![img.png](readme/img.png)
 ![img.png](readme/img-2.png)
 ![img.png](readme/img3.png)
+通过命令创建单文件或直接嵌入当前文件
+![img.png](readme/img_1.png)
+
 
 本项目主要是集成了 https://github.com/wanglin2/mind-map，
 这是一个非常棒的完全开源的可本地化思维导图项目
@@ -30,6 +24,12 @@
 6. 嵌入模式允许自定义嵌入高度
 
 # 使用
+## 配置：
+目前仅允许配置文件保存路径，不配置则默认与obsidian总附件目录设置一致
+## 创建
+目前提供了两种命令：
+- create mindMap   创建单独的思维导图文件并跳转过去编辑
+- create mindMap and embedd...  创建思维导入文件并嵌入在当前编辑页光标处
 
 
 # BUG
@@ -40,7 +40,9 @@
 
 # 后续工作
 1. bug修复
-2. 添加自定义命令和按钮快速创建导图文件
+2. 使用命令创建思维导图时
+   1. 如果是嵌入模式，根据当前文件给思维导图命名,并将思维导图根节点命名为文件名；
+   2. 如果是单独打开，允许通过弹出框输入文件名，并将思维导图根节点命名为文件名
 3. 快捷键优化
 4. 为节点添加备注
 5. 为节点添加超链接

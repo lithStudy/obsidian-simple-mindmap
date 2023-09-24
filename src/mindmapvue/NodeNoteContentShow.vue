@@ -67,7 +67,7 @@ export default {
       //计算偏移
       // let rect = this.app.workspace.activeLeaf.containerEl.getBoundingClientRect();
       let rect = this.contentEl.getBoundingClientRect();
-      debugger
+      // debugger
       const paddingTop = parseFloat(getComputedStyle(this.contentEl).paddingTop);
       const paddingBottom = parseFloat(getComputedStyle(this.contentEl).paddingBottom);
 

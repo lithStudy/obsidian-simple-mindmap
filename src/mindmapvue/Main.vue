@@ -134,7 +134,7 @@ export default {
     this.mydata.compId = Math.random();
 
 
-    debugger
+    // debugger
 
     this.mydata.mindMapData = {...this.mydata.mindMapData, ...this.initMindData};
     this.mydata.mindMode = this.mode || 'edit'
@@ -307,7 +307,7 @@ export default {
       // }
     },
     setPosition() {
-      debugger
+      // debugger
       // 获取父容器和子元素
       const parentElement = this.contentEl.parentElement
       const childElement = this.contentEl.querySelector('#mindMapContainer');
