@@ -1,7 +1,7 @@
 {
-    "name": "obsidian-vue-sample-plugin",
+    "name": "obsidian-vue-simple-mindmap",
     "version": "1.0.0",
-    "description": "This is a Vue sample plugin for Obsidian.",
+    "description": "This is a mind mapping plugin that integrates an open-source project called wanglin2/mind-map.",
     "keywords": [
         "obsidian-plugin"
     ],
