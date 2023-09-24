@@ -3,12 +3,13 @@
 本项目只是站在巨人的肩膀上做了集成，一方面是个人喜欢这个思维导图项目，另一方面也希望向大家推荐它
 # 介绍
 本项目是一种obsidian的思维导图插件
+### 深色模式
 ![img.png](readme/img.png)
+### 浅色模式
 ![img.png](readme/img-2.png)
+### 嵌入模式
 ![img.png](readme/img3.png)
-
-通过命令创建单文件或直接嵌入当前文件
-
+### 通过命令创建单文件或直接嵌入当前文件
 ![img.png](readme/img_1.png)
 
 # 功能
