@@ -1,6 +1,7 @@
 import {TextFileView} from "obsidian";
 import {createApp, App as VueApp} from "vue";
-import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
+// import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
+import SimpleMindMap from "./mindmapvue/Main.vue";
 import MindMap from "simple-mind-map";
 import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} from "./constants/constant";
 
@@ -56,6 +57,7 @@ export class MufengMakrMindView extends TextFileView {
             if (heightWithoutPadding < 0) {
                 heightWithoutPadding = 1000;
             }
+
             // newDiv.style.height = heightWithoutPadding +"px";
             //debugger
             // 这里如果是打开新标签页，容器可能还没有渲染完成，无法执行命令，延迟一点时间
@@ -76,7 +78,7 @@ export class MufengMakrMindView extends TextFileView {
                     initMindData: this.markMindData,
                     app: this.app,
                     mode: 'edit',
-                    noteMode:'slide',
+                    initNoteMode:'slide',
                     initElementHeight: heightWithoutPadding +"px",
                     showMiniMap: true,
                     showMindTools:true,

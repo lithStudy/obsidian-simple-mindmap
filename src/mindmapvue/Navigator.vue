@@ -1,5 +1,6 @@
 <template>
   <div
+      id="navigatorId"
       class="navigatorBox"
       :class="{ isDark: isDark }"
       :style="{ top: top + 'px', left: left + 'px'}"
@@ -129,6 +130,9 @@ export default {
       this.svgBoxScale = miniMapBoxScale
       this.svgBoxLeft = miniMapBoxLeft
       this.svgBoxTop = miniMapBoxTop
+
+      // this.init();
+      // this.setPosition();
     },
 
     onMousedown(e) {

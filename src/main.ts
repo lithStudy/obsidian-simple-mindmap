@@ -17,7 +17,7 @@ import {MufengMakrMindView, MUFENG_MARKMIND_VIEW} from "./my-markmind-view"
 import EditingViewPlugin from "./editing-view-plugin";
 import {getEmbeddedLoomLinkEls, findEmbeddedLoomFile} from "./embedded/embed-utils"
 import {createApp, App as VueApp} from "vue";
-import SimpleMindMap from "./simple-mind-map.vue";
+import SimpleMindMap from "./mindmapvue/Main.vue";
 import {FILE_EXTENSION} from "./constants/constant";
 
 /**
@@ -95,29 +95,47 @@ export default class SamplePlugin extends Plugin {
         );
 
         //注册mind预览模式下后处理器
-        // this.registerMarkdownPostProcessor(async (element, context) => {
-        //   const linkEl = element.querySelector(".internal-embed");
-        //   if(linkEl){
-        //     const src = linkEl.getAttribute("src");
-        //     //只处理mind后缀的
-        //     if (src?.endsWith(FILE_EXTENSION)){
-        //       if (src){
-        //         const file  = this.app.metadataCache.getFirstLinkpathDest(src, context.sourcePath)
-        //         if(file){ 
-        //           let mindHeight =  linkEl.getAttribute("height");
-        //           // debugger;
-        //           if (mindHeight === null || mindHeight === "0") {
-        //             mindHeight='400';
-        //           }
-        //           mindHeight+='px';
+        this.registerMarkdownPostProcessor(async (element, context) => {
+          const linkEl = element.querySelector(".internal-embed");
+          if(linkEl){
+            const src = linkEl.getAttribute("src");
+            //只处理mind后缀的
+            if (src?.endsWith(FILE_EXTENSION)){
+              if (src){
+                const file  = this.app.metadataCache.getFirstLinkpathDest(src, context.sourcePath)
+                if(file){
+                  let mindHeight =  linkEl.getAttribute("height");
+                  // debugger;
+                  if (mindHeight === null || mindHeight === "0") {
+                    mindHeight='400';
+                  }
+                  mindHeight+='px';
 
-        //           const data =await this.app.vault.read(file);
-        //           const vm = createApp(SimpleMindMap, { mindFile:file,initMindData: JSON.parse(data),app:this.app,mode:'preview',initElementHeight:mindHeight}).mount(linkEl);   	            
-        //         }
-        //       }
-        //     }
-        //   }
-        // });
+                  linkEl.empty();
+                  linkEl.style.height='400px';
+                  linkEl.style.width = "100%";
+                  const data =await this.app.vault.read(file);
+                  createApp(SimpleMindMap, {
+                        mindFile:file,
+                        initMindData: JSON.parse(data),
+                        app: this.app,
+                        mode: 'preview',
+                        contentEl:linkEl,
+                        showMiniMap: false,
+                        showMindTools:false,
+                        initNoteMode:'notSlide',
+                        initElementHeight: mindHeight,
+
+                        leaf: context,
+                        viewId: 0,
+
+                    }).mount(linkEl);
+
+                }
+              }
+            }
+          }
+        });
 
     }
 

@@ -9,18 +9,12 @@
       <div @click="resize()" class="toolsButton">重定位</div>
       <div @click="remark()" class="toolsButton">备注</div>
     </div>
-<!--    <div id="remarkDiv" class="remarkDiv" v-if="showRemark"-->
-<!--         :class="{ isDark: isDark }"-->
-<!--         :style="{ top: remarkTop + 'px', right: remarkRight + 'px'}">-->
-<!--      <textarea v-model="remarkContent" class="remarkTextarea">111</textarea>-->
-<!--      <div @click="saveRemark()" class="remarkButton">保存</div>-->
-<!--    </div>-->
   </div>
 
 </template>
 
 <script>
-import { useEmitter  } from 'vue'
+// import { useEmitter  } from 'vue'
 
 export default {
   props: {
@@ -81,6 +75,13 @@ export default {
     remark(){
       console.log("点击备注按钮")
       this.$emit('remakModelToggle', '新的值');
+
+      setTimeout(()=> {
+        // debugger
+        // this.mindMap.resize();
+        this.setPosition();
+      }, 100);
+
       // this.showRemark = !this.showRemark;
       // if(this.showRemark){
       //   if (this.mindMap.renderer.activeNodeList.length <= 0) {
@@ -106,7 +107,6 @@ export default {
     },
     setPosition(){
         // 获取父容器和子元素
-        // const parentElement = this.contentEl.querySelector('[data-type="mufeng-markmind"].workspace-leaf-content')
         const parentElement = this.contentEl.parentElement
         const childElement = this.contentEl.querySelector('#mindMapContainer');
 
@@ -120,7 +120,7 @@ export default {
         this.right=relativeRight
         this.top=relativeTop
         this.remarkTop = this.top
-      this.remarkRight = this.right+130
+        this.remarkRight = this.right+130
     },
 
   }
@@ -141,13 +141,12 @@ export default {
   }
   .toolsButton{
     //margin-left: 10px;
-    padding-left: 10px;
-    padding-right:10px;
+    padding-left: 8px;
+    padding-right:8px;
     float: left;
-    width: 80px;
-    line-height: 30px;
+    line-height: 25px;
     text-align:center;
-    font-size: small;
+    font-size: smaller;
     border-radius: 4px;
     border: 1px solid #eee;
   }
@@ -159,6 +158,7 @@ export default {
   right: 20px;
   cursor: pointer;
   user-select: none;
+  width:100%;
 
   .remarkTextarea{
     height: 100px;

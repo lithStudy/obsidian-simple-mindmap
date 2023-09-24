@@ -1,6 +1,6 @@
 import {App, MarkdownView, TFile, WorkspaceLeaf} from "obsidian";
 import {createApp, App as VueApp} from "vue";
-import SimpleMindMap from "../mindmapvue/simple-mind-map.vue";
+import SimpleMindMap from "../mindmapvue/Main.vue";
 import {FILE_EXTENSION,EVENT_APP_EMBEDDED_RESIZE} from "../constants/constant";
 
 import {

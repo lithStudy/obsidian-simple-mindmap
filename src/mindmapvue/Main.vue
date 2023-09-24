@@ -2,12 +2,29 @@
   <div>
     <!--<span>{{mydata.compId}}</span>-->
     <div id="mindMapContainer" :style="{ height: mydata.initHeight,width:mydata.mindMapContainerWidth }"></div>
-    <div id="miniMap" v-if="showMiniMap"></div>
-    <div id="mindTools" v-if="showMindTools" @remakModelToggle="remakModelToggle"></div>
-    <NodeNoteContentShow :app="app" :mindMap="mindMap" :contentEl="contentEl" v-if="noteMode != 'slide'"></NodeNoteContentShow>
-    <div id="node" v-if="noteMode === 'slide'">
+    <Navigator v-if="showMiniMap && mindMapReady"
+               :mindMap="mindMap"
+               :app="app"
+               :contentEl="contentEl">
+    </Navigator>
+
+    <mind-tools v-if="showMindTools && mindMapReady"
+                :mindMap="mindMap"
+                :app="app"
+                :contentEl="contentEl"
+                @remakModelToggle="remakModelToggle"
+    ></mind-tools>
+
+    <NodeNoteContentShow
+        :app="app"
+        :mindMap="mindMap"
+        :contentEl="contentEl"
+        v-if="noteMode != 'slide' && mindMapReady">
+    </NodeNoteContentShow>
+
+    <div id="node" v-if="noteMode === 'slide'" >
       <div id="remarkDiv" class="remarkDiv" :style="{ height: mydata.initHeight }">
-        <textarea id="nodeNote" v-model="remarkContent" class="remarkTextarea">111</textarea>
+        <textarea id="nodeNote"  class="remarkTextarea" v-model="noteContext" @input="handleTextarea">111</textarea>
       </div>
     </div>
 
@@ -17,15 +34,6 @@
 <script lang="ts">
 import {
   createApp,
-  defineComponent,
-  ref,
-  onMounted,
-  onUnmounted,
-  shallowRef,
-  reactive,
-  provide,
-  inject,
-  nextTick
 } from "vue";
 import MindMap from "simple-mind-map";
 import Drag from "simple-mind-map/src/plugins/Drag.js"
@@ -44,7 +52,7 @@ import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
 const THROTTLE_TIME_MILLIS = 3000;
 
 export default {
-  name: 'NodeNoteContentShow',
+  name: 'SimpleMindMap',
   components: {
     Navigator,
     MindTools,
@@ -67,7 +75,7 @@ export default {
     mode: {
       required: false
     },
-    noteMode:{
+    initNoteMode:{
       required:false
     },
     initElementHeight: {
@@ -86,7 +94,8 @@ export default {
     },
     leaf: {
       required: true
-    }
+    },
+
   },
   data() {
     return {
@@ -96,22 +105,36 @@ export default {
         mindMode: 'edit',
         mindTheme: 'dark',
         initHeight: '1000px',
-        mindMapContainerWidth:'100%'
+        mindMapContainerWidth:'100%',
+        noteContainerWidth:'20%',
       },
       firstRender: true,
-      mindMap:null,
+      mindMap:null as MindMap,
       el_temp:null as Element,
       show: false,
       left: 0,
       top: 0,
+      mindMapReady:false,
+      noteMode:'slide',
+      noteContext:"",
     }
   },
   created() {
-  },
-  mounted() {
-    this.mydata.compId = Math.random();
     this.mydata.initHeight = this.initElementHeight
 
+    this.noteMode = this.initNoteMode;
+    if (this.noteMode === 'slide') {
+      this.mydata.mindMapContainerWidth='80%';
+      this.mydata.noteContainerWidth='20%'
+    }
+  },
+  mounted() {
+    console.log(this.noteMode)
+
+    this.mydata.compId = Math.random();
+
+
+    debugger
 
     this.mydata.mindMapData = {...this.mydata.mindMapData, ...this.initMindData};
     this.mydata.mindMode = this.mode || 'edit'
@@ -187,26 +210,23 @@ export default {
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
     })
 
-    let nodeNoteEl = this.contentEl.querySelector('#nodeNote');
+    // let nodeNoteEl = this.contentEl.querySelector('#nodeNote');
     this.mindMap.on("node_active",(node)=>{
       if (!node) {
         return
       }
-
-      if (nodeNoteEl) {
-        nodeNoteEl.value=node.getData('note');
-      }
+      this.noteContext = node.getData('note');
     })
 
-    if (nodeNoteEl) {
-      nodeNoteEl.addEventListener('input', function(event) {
-        console.log("监听input")
-        // throttleSaveNote();
-        this.saveNote();
-        // 处理输入事件，使用获取到的 value ...
-      });
-
-    }
+    // if (nodeNoteEl) {
+    //   nodeNoteEl.addEventListener('input', (event) =>{
+    //     console.log("监听input")
+    //     // throttleSaveNote();
+    //     this.saveNote();
+    //     // 处理输入事件，使用获取到的 value ...
+    //   });
+    //
+    // }
 
     //监听刷新事件，刷新视图
     this.app.workspace.on(
@@ -244,29 +264,91 @@ export default {
       }
     })
 
+    if(this.mindMap){
+      this.mindMapReady = true;
+
+      this.setPosition();
+    }
 
     // debugger
     //渲染小地图
-    if (this.showMiniMap) {
-      createApp(Navigator, {
-        mindMap: this.mindMap,
-        app: this.app,
-        contentEl: this.contentEl
-      }).mount(this.contentEl.querySelector("#miniMap"));
-    }
+    // if (this.showMiniMap) {
+    //   createApp(Navigator, {
+    //     mindMap: this.mindMap,
+    //     app: this.app,
+    //     contentEl: this.contentEl
+    //   }).mount(this.contentEl.querySelector("#miniMap"));
+    // }
     //渲染工具栏
-    if (this.showMindTools){
-      createApp(MindTools, {
-        mindMap: this.mindMap,
-        app: this.app,
-        contentEl: this.contentEl
-      }).mount(this.contentEl.querySelector("#mindTools"));
-    }
+    // if (this.showMindTools){
+    //   createApp(MindTools, {
+    //     mindMap: this.mindMap,
+    //     app: this.app,
+    //     contentEl: this.contentEl
+    //   }).mount(this.contentEl.querySelector("#mindTools"));
+    // }
   },
   beforeDestroy() {
 
   },
   methods: {
+    handleTextarea(){
+
+      this.saveNote();
+      //
+      // if (nodeNoteEl) {
+      //   nodeNoteEl.addEventListener('input', (event) =>{
+      //     console.log("监听input")
+      //     // throttleSaveNote();
+      //     this.saveNote();
+      //     // 处理输入事件，使用获取到的 value ...
+      //   });
+      //
+      // }
+    },
+    setPosition() {
+      debugger
+      // 获取父容器和子元素
+      const parentElement = this.contentEl.parentElement
+      const childElement = this.contentEl.querySelector('#mindMapContainer');
+      // 获取子元素相对于父容器的位置信息
+      const parentRect = parentElement.getBoundingClientRect();
+      const childRect = childElement.getBoundingClientRect();
+
+      const relativeLeft = childRect.left - parentRect.left;
+      const relativeTop = childRect.top - parentRect.top;
+
+      this.left = relativeLeft
+      this.top = relativeTop
+    },
+    remakModelToggle(remarkMode){
+      console.log('remakModelToggle')
+      // if(remarkMode==='slide'){
+      //
+      // }
+      // debugger
+      if(this.noteMode==='slide'){
+        this.noteMode='notSlide';
+        this.mydata.mindMapContainerWidth='100%';
+      }else {
+        this.noteMode='slide';
+        this.mydata.mindMapContainerWidth='80%';
+      }
+
+      setTimeout(()=> {
+        // debugger
+        this.mindMap.resize();
+      }, 10);
+
+
+      // if(this.noteMode==='notSlide'){
+      //   this.noteMode='slide';
+      //   this.mydata.mindMapContainerWidth='80%';
+      //   this.mydata.noteContainerWidth='20%'
+      // }
+
+
+    },
     /**
      * 尺寸重置
      */
@@ -306,7 +388,7 @@ export default {
       if (this.mindMap.renderer.activeNodeList.length <= 0) {
         return
       }
-      this.mindMap.renderer.activeNodeList[0].setNote(this.contentEl.querySelector('#nodeNote').value);
+      this.mindMap.renderer.activeNodeList[0].setNote(this.noteContext);
     },
     handleRefreshEvent(newCompId, newMindData, newFilePath){
       console.log("准备刷新：" + this.mydata.compId)
@@ -342,14 +424,13 @@ export default {
       this.app.workspace.off("hideNoteContent")
       this.app.workspace.off("node_active")
     },
-    throttleSave(mindDataTempParam: {}){
-      _.throttle((mindDataTempParam) => {
+    throttleSave: _.throttle(function (mindDataTempParam){
+        console.log("准备保存：throttle")
         //保存文件
         this.app.vault.modify(this.mindFile, JSON.stringify(mindDataTempParam));
         //触发刷新事件用于通知其他视图刷新
         this.app.workspace.trigger(EVENT_APP_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
-      }, THROTTLE_TIME_MILLIS);
-    },
+      }, THROTTLE_TIME_MILLIS),
 
   }
 }
@@ -359,7 +440,9 @@ export default {
 
 <style scoped>
 /* @import "./simpleMindMap.esm.css"; */
-
+.leftTop{
+  position: absolute;
+}
 #mindMapContainer {
   width: 80%;
   float: left;
@@ -389,18 +472,6 @@ export default {
   .remarkTextarea{
     height: 100%;
     width: 100%
-  }
-  .remarkButton{
-  /*margin-left: 10px;*/
-    padding-left: 10px;
-    padding-right:10px;
-    float: left;
-    width: 50px;
-    line-height: 25px;
-    text-align:center;
-    font-size: small;
-    border-radius: 4px;
-    border: 1px solid #eee;
   }
 }
 </style>
