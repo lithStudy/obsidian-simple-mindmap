@@ -1,6 +1,7 @@
 import {TextFileView} from "obsidian";
 import {createApp, App as VueApp} from "vue";
-import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
+// import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
+import SimpleMindMap from "./mindmapvue/Main.vue";
 import MindMap from "simple-mind-map";
 import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} from "./constants/constant";
 
@@ -40,7 +41,7 @@ export class MufengMakrMindView extends TextFileView {
             //重置dom节点
             this.contentEl.empty();
             const newDiv = this.contentEl.createDiv({});
-            newDiv.style.height = '1000px';
+            // newDiv.style.height = '1000px';
             newDiv.style.width = '100%';
 
 
@@ -56,7 +57,8 @@ export class MufengMakrMindView extends TextFileView {
             if (heightWithoutPadding < 0) {
                 heightWithoutPadding = 1000;
             }
-            newDiv.style.height = heightWithoutPadding +"px";
+
+            // newDiv.style.height = heightWithoutPadding +"px";
             //debugger
             // 这里如果是打开新标签页，容器可能还没有渲染完成，无法执行命令，延迟一点时间
             setTimeout(() => {
@@ -76,10 +78,12 @@ export class MufengMakrMindView extends TextFileView {
                     initMindData: this.markMindData,
                     app: this.app,
                     mode: 'edit',
-                    initElementHeight: newDiv.style.height,
+                    initNoteMode:'slide',
+                    initElementHeight: heightWithoutPadding +"px",
                     showMiniMap: true,
                     showMindTools:true,
-                    contentEl: this.containerEl
+                    // contentEl: this.containerEl,
+                    contentEl:this.contentEl
                 })
                 console.log("createApp after")
                 const vm = this.mindApp.mount(newDiv);
@@ -100,20 +104,16 @@ export class MufengMakrMindView extends TextFileView {
 
     //
     setViewData(data: string, clear: boolean) {
-        console.log("setViewData:" + data)
         this.markMindData = JSON.parse(data);
 
         //clear为true，说明正在打开另一个文件
         if (clear) {
-            this.app.workspace.onLayoutReady(() => {
-                if (this.mindApp) {
-                    console.log("卸载myapp")
-                    this.mindApp.unmount();
-                }
-                console.log('gggggggggggggg');
-                this.initMind();
-            })
-
+            if (this.mindApp) {
+                console.log("卸载myapp")
+                this.mindApp.unmount();
+            }
+            console.log('gggggggggggggg');
+            this.initMind();
         }
 
     }

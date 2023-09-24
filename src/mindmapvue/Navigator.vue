@@ -1,5 +1,6 @@
 <template>
   <div
+      id="navigatorId"
       class="navigatorBox"
       :class="{ isDark: isDark }"
       :style="{ top: top + 'px', left: left + 'px'}"
@@ -67,6 +68,7 @@ export default {
   },
   mounted() {
     this.init()
+    this.setPosition();
 
     this.mindMap.on('data_change', this.data_change)
     this.mindMap.on('view_data_change', this.data_change)
@@ -78,6 +80,7 @@ export default {
 
   },
   destroyed() {
+    this.mindMap.on('data_change', this.data_change)
     this.mindMap.off('view_data_change', this.data_change)
     this.mindMap.off('node_tree_render_end', this.data_change)
     this.app.workspace.off("css-change");
@@ -98,18 +101,12 @@ export default {
       if (!this.showMiniMap) {
         return
       }
+      this.drawMiniMap()
       // clearTimeout(this.timer)
       // this.timer = setTimeout(() => {
-      //   this.setPosition();
+      //   // this.setPosition();
       //   this.drawMiniMap()
       // }, 500)
-
-      this.$nextTick(() => {
-        this.setPosition();
-        this.drawMiniMap()
-      })
-
-
     },
     init() {
       let {width, height} = this.$refs.navigatorBox.getBoundingClientRect()
@@ -133,6 +130,9 @@ export default {
       this.svgBoxScale = miniMapBoxScale
       this.svgBoxLeft = miniMapBoxLeft
       this.svgBoxTop = miniMapBoxTop
+
+      // this.init();
+      // this.setPosition();
     },
 
     onMousedown(e) {
@@ -161,10 +161,8 @@ export default {
     },
     setPosition() {
       // 获取父容器和子元素
-      // const parentElement = this.contentEl.querySelector('[data-type="mufeng-markmind"].workspace-leaf-content')
-      const parentElement = this.contentEl
+      const parentElement = this.contentEl.parentElement
       const childElement = this.contentEl.querySelector('#mindMapContainer');
-
       // 获取子元素相对于父容器的位置信息
       const parentRect = parentElement.getBoundingClientRect();
       const childRect = childElement.getBoundingClientRect();

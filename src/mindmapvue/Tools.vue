@@ -1,17 +1,20 @@
 <template>
-  <div
-    class="mindToolsBox"
-    :class="{ isDark: isDark }"
-    :style="{ top: top + 'px', right: right + 'px'}"
-    ref="mindToolsBox"
-  >
-    <div @click="resize()" class="toolsButton">重置</div>
-    <div class="toolsButton">备注</div>
+  <div>
+    <div
+        class="mindToolsBox"
+        :class="{ isDark: isDark }"
+        :style="{ top: top + 'px', right: right + 'px'}"
+        ref="mindToolsBox"
+    >
+      <div @click="resize()" class="toolsButton">重定位</div>
+      <div @click="remark()" class="toolsButton">备注</div>
+    </div>
   </div>
+
 </template>
 
 <script>
-import { inject } from 'vue'
+// import { useEmitter  } from 'vue'
 
 export default {
   props: {
@@ -34,6 +37,10 @@ export default {
       boxHeight: 0,
       top:0,
       right:0,
+      remarkTop:0,
+      remarkRight:0,
+      showRemark:true,
+      remarkContent:"",
       clickCount: 0,         // 点击次数计数器
       clickTimestamps: []   // 点击时间戳数组
     }
@@ -48,6 +55,13 @@ export default {
       this.updateTheme()
     },this.app)
 
+    // this.mindMap.on("node_active",(node)=>{
+    //   if (!node) {
+    //     return
+    //   }
+    //   this.remarkContent=node.getData('note');
+    // })
+
   },
   destroyed() {
     this.app.workspace.off("css-change");
@@ -57,6 +71,30 @@ export default {
       // console.log("定位根节点")
       this.mindMap.resize();
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
+    },
+    remark(){
+      console.log("点击备注按钮")
+      this.$emit('remakModelToggle', '新的值');
+
+      setTimeout(()=> {
+        // debugger
+        // this.mindMap.resize();
+        this.setPosition();
+      }, 100);
+
+      // this.showRemark = !this.showRemark;
+      // if(this.showRemark){
+      //   if (this.mindMap.renderer.activeNodeList.length <= 0) {
+      //     return
+      //   }
+      //   this.remarkContent=this.mindMap.renderer.activeNodeList[0].getData('note')
+      // }
+    },
+    saveRemark(){
+      if (this.mindMap.renderer.activeNodeList.length <= 0) {
+        return
+      }
+      this.mindMap.renderer.activeNodeList[0].setNote(this.remarkContent)
     },
     updateTheme(){
       const el = document.querySelector("body");
@@ -69,8 +107,7 @@ export default {
     },
     setPosition(){
         // 获取父容器和子元素
-        // const parentElement = this.contentEl.querySelector('[data-type="mufeng-markmind"].workspace-leaf-content')
-        const parentElement = this.contentEl
+        const parentElement = this.contentEl.parentElement
         const childElement = this.contentEl.querySelector('#mindMapContainer');
 
         // 获取子元素相对于父容器的位置信息
@@ -82,6 +119,8 @@ export default {
 
         this.right=relativeRight
         this.top=relativeTop
+        this.remarkTop = this.top
+        this.remarkRight = this.right+130
     },
 
   }
@@ -91,15 +130,9 @@ export default {
 <style  lang="less" scoped>
 .mindToolsBox {
   position: absolute;
-  //width: 150px;
-  //height: 100px;
   background-color: #fff;
-  // bottom: 80px;
-  // right: 70px;
   top: 10px;
   right: 20px;
-  //box-shadow: 0 0 16px #989898;
-
   cursor: pointer;
   user-select: none;
 
@@ -108,12 +141,38 @@ export default {
   }
   .toolsButton{
     //margin-left: 10px;
+    padding-left: 8px;
+    padding-right:8px;
+    float: left;
+    line-height: 25px;
+    text-align:center;
+    font-size: smaller;
+    border-radius: 4px;
+    border: 1px solid #eee;
+  }
+}
+.remarkDiv{
+  position: absolute;
+  //background-color: #fff;
+  top: 40px;
+  right: 20px;
+  cursor: pointer;
+  user-select: none;
+  width:100%;
+
+  .remarkTextarea{
+    height: 100px;
+    width: 400px;
+  }
+  .remarkButton{
+    //margin-left: 10px;
     padding-left: 10px;
     padding-right:10px;
     float: left;
-    width: 60px;
-    line-height: 40px;
+    width: 50px;
+    line-height: 25px;
     text-align:center;
+    font-size: small;
     border-radius: 4px;
     border: 1px solid #eee;
   }
