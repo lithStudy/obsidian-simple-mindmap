@@ -1,14 +1,3 @@
-<br />
-
-[![splash.png]][splash.png.github]
-
-[![obsidian.shield]]() [![typescript.shield]]() [![vue.shield]]() [![esbuild.shield]]() <br />
-[![status.shield]]() [![license.shield]]()
-
-[English] • [简体中文] &#x1F54A;&#xFE0F;
-
-<br />
-
 # 介绍
 
 本项目是一种obsidian的思维导图插件
