@@ -15,7 +15,7 @@ import {
 import {SampleSettingTab} from "./setting-tab";
 import {ExampleView, VIEW_TYPE_EXAMPLE} from "./test-view";
 import {MufengMindMapView, MUFENG_MARKMIND_VIEW} from "./my-markmind-view"
-import EditingViewPlugin from "./editing-view-plugin";
+import EmbeddPlugin from "./embedd-plugin";
 import {getEmbeddedLoomLinkEls, findEmbeddedLoomFile} from "./embedded/embed-utils"
 import {createApp, App as VueApp} from "vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
@@ -103,7 +103,7 @@ export default class SamplePlugin extends Plugin {
 
         //注册编辑器扩展
         this.registerEditorExtension(
-            EditingViewPlugin(this.app, this.manifest.version)
+            EmbeddPlugin(this.app, this.manifest.version)
         );
 
         //注册mind预览模式下后处理器

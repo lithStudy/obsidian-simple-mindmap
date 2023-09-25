@@ -4,7 +4,7 @@ import {loadEmbeddedLoomApps} from "./embedded/embedded-app-manager";
 import {App} from "obsidian";
 import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} from "./constants/constant";
 
-export default function EditingViewPlugin(
+export default function EmbeddPlugin(
     app: App,
     manifestPluginVersion: string
 ) {

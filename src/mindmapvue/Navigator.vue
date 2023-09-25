@@ -80,7 +80,7 @@ export default {
 
   },
   destroyed() {
-    this.mindMap.on('data_change', this.data_change)
+    this.mindMap.off('data_change', this.data_change)
     this.mindMap.off('view_data_change', this.data_change)
     this.mindMap.off('node_tree_render_end', this.data_change)
     this.app.workspace.off("css-change");

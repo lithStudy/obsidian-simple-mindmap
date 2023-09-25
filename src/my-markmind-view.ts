@@ -35,6 +35,7 @@ export class MufengMindMapView extends TextFileView {
 
 
     initMind = () => {
+        debugger
         if (!this.markMind) {
             console.log('initMind ddddd')
             // debugger
@@ -105,12 +106,26 @@ export class MufengMindMapView extends TextFileView {
     //
     setViewData(data: string, clear: boolean) {
         this.markMindData = JSON.parse(data);
-
         //clear为true，说明正在打开另一个文件
+        debugger
         if (clear) {
             if (this.mindApp) {
                 console.log("卸载myapp")
+                this.markMind.off('data_change')
+                this.markMind.off('view_data_change')
+                this.markMind.off('node_tree_render_end')
+
+                this.app.workspace.off(EVENT_APP_REFRESH);
+                this.app.workspace.off(EVENT_APP_EMBEDDED_RESIZE);
+                this.app.workspace.off('resize');
+                this.app.workspace.off("css-change");
+                this.app.workspace.off("quick-preview")
+                this.app.workspace.off("active-leaf-change")
+
                 this.mindApp.unmount();
+                this.markMind=null;
+
+
             }
             console.log('gggggggggggggg');
             this.initMind();
@@ -143,6 +158,8 @@ export class MufengMindMapView extends TextFileView {
         this.app.workspace.off("css-change");
         this.app.workspace.off("quick-preview")
         this.app.workspace.off("active-leaf-change")
+
+
     }
 
 
