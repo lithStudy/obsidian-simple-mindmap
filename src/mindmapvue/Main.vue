@@ -1,10 +1,11 @@
 <template>
   <div>
-    <!--<span>{{mydata.compId}}</span>-->
+    <span>{{mydata.compId}}</span>
     <div id="mindMapContainer" :style="{ height: mydata.initHeight,width:mydata.mindMapContainerWidth }"></div>
     <Navigator v-if="showMiniMap && mindMapReady"
                :mindMap="mindMap"
                :app="app"
+               :compId="mydata.compId"
                :contentEl="contentEl">
     </Navigator>
 
@@ -289,6 +290,7 @@ export default {
     // }
   },
   beforeDestroy() {
+    console.log("Main beforeDestroy")
     this.mindMap.off('data_change')
     this.mindMap.off('view_data_change')
     this.mindMap.off('node_tree_render_end')

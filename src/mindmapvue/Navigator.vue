@@ -35,7 +35,8 @@ export default {
     },
     contentEl: {
       required: false
-    }
+    },
+    compId:0,
   },
   data() {
     return {
@@ -57,6 +58,7 @@ export default {
         left: 0,
         top: 0
       },
+
       top: 0,
       left: 0,
       clickCount: 0,         // 点击次数计数器
@@ -80,6 +82,7 @@ export default {
 
   },
   destroyed() {
+    console.log("Navigator destroyed")
     this.mindMap.off('data_change', this.data_change)
     this.mindMap.off('view_data_change', this.data_change)
     this.mindMap.off('node_tree_render_end', this.data_change)
@@ -98,6 +101,7 @@ export default {
       })
     },
     data_change() {
+      console.log('navigator compId:'+this.compId);
       if (!this.showMiniMap) {
         return
       }
