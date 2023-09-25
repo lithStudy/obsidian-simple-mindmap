@@ -13,7 +13,7 @@ export class MufengMindMapView extends TextFileView {
     private pluginId: string;
     private pluginVersion: string;
     //思维导图对象
-    private markMind: MindMap;
+    private mindMap: MindMap;
     //思维导图数据集
     private markMindData: {};
 
@@ -29,14 +29,14 @@ export class MufengMindMapView extends TextFileView {
         this.pluginVersion = pluginVersion;
         this.data = "";
         this.viewId = Math.random();
-        this.markMind = null;
+        this.mindMap = null;
         this.markMindData = {};
     }
 
 
     initMind = () => {
         debugger
-        if (!this.markMind) {
+        if (!this.mindMap) {
             console.log('initMind ddddd')
             // debugger
             //重置dom节点
@@ -88,14 +88,28 @@ export class MufengMindMapView extends TextFileView {
                 })
                 console.log("createApp after")
                 const vm = this.mindApp.mount(newDiv);
-                this.markMind = vm.mindMap
-                // if(!this.markMind){
+                this.mindMap = vm.mindMap
+                // if(!this.mindMap){
                 //   debugger;
                 // }
 
             }, 200);
 
         }
+    }
+
+    offListener= () => {
+        if(this.mindMap){
+            this.mindMap.off('data_change')
+            this.mindMap.off('view_data_change')
+            this.mindMap.off('node_tree_render_end')
+        }
+        this.app.workspace.off(EVENT_APP_REFRESH);
+        this.app.workspace.off(EVENT_APP_EMBEDDED_RESIZE);
+        this.app.workspace.off('resize');
+        this.app.workspace.off("css-change");
+        this.app.workspace.off("quick-preview")
+        this.app.workspace.off("active-leaf-change")
     }
 
     //obsidian获取数据
@@ -111,19 +125,10 @@ export class MufengMindMapView extends TextFileView {
         if (clear) {
             if (this.mindApp) {
                 console.log("卸载myapp")
-                this.markMind.off('data_change')
-                this.markMind.off('view_data_change')
-                this.markMind.off('node_tree_render_end')
 
-                this.app.workspace.off(EVENT_APP_REFRESH);
-                this.app.workspace.off(EVENT_APP_EMBEDDED_RESIZE);
-                this.app.workspace.off('resize');
-                this.app.workspace.off("css-change");
-                this.app.workspace.off("quick-preview")
-                this.app.workspace.off("active-leaf-change")
-
+                this.offListener();
                 this.mindApp.unmount();
-                this.markMind=null;
+                this.mindMap=null;
 
 
             }
@@ -158,8 +163,6 @@ export class MufengMindMapView extends TextFileView {
         this.app.workspace.off("css-change");
         this.app.workspace.off("quick-preview")
         this.app.workspace.off("active-leaf-change")
-
-
     }
 
 

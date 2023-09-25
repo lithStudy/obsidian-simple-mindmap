@@ -289,7 +289,11 @@ export default {
     // }
   },
   beforeDestroy() {
-
+    this.mindMap.off('data_change')
+    this.mindMap.off('view_data_change')
+    this.mindMap.off('node_tree_render_end')
+    this.mindMap.off('node_active')
+    this.mindMap.off('view_theme_change')
   },
   methods: {
     handleTextarea(){
