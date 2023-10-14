@@ -9,6 +9,7 @@
       <div @click="resize()" class="toolsButton">重定位</div>
       <div @click="remark()" class="toolsButton">备注</div>
       <div @click="priority()" class="toolsButton">优先级</div>
+    
     </div>
   </div>
 
@@ -151,7 +152,7 @@ export default {
       }else{
         node.setIcon(["priority_1"])
       }
-    },
+    }
 
   }
 }
