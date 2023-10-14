@@ -16,7 +16,7 @@ export const getEmbeddedLoomLinkEls = (
 
 	if (el) {
 		const embeddedLinkEls = el.querySelectorAll("div > .internal-embed");
-		debugger
+
 		for (let i = 0; i < embeddedLinkEls.length; i++) {
 			const linkEl = embeddedLinkEls[i];
 			const src = linkEl.getAttribute("src");

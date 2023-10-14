@@ -116,6 +116,9 @@ export default class SamplePlugin extends Plugin {
                     if (src?.endsWith(FILE_EXTENSION)){
                         
                       if (src){
+                        //这里移除此css样式的目的是为了阻止跳转
+                        //阻止跳转的目的有两个：1.方便直接预览而不是跳到详情页面查看，2.这里有个未知bug：如果从预览页面跳转到详情页，在退回到预览页会导致快捷键都失效掉
+                        linkEl.classList.remove('internal-embed');
                         this.loadMind(src,context,linkEl);
                       }
                     }
@@ -335,34 +338,40 @@ export default class SamplePlugin extends Plugin {
 
 
     private async loadMind(src,context,linkEl){
+        linkEl.addEventListener("click", (e) => {
+            console.log("linkEl.addEventListener stop")
+            e.preventDefault();
+        });
+
         const file  = this.app.metadataCache.getFirstLinkpathDest(src, context.sourcePath)
         if(file){
-        let mindHeight =  linkEl.getAttribute("height");
-        // debugger;
-        if (mindHeight === null || mindHeight === "0") {
-            mindHeight='400';
-        }
-        mindHeight+='px';
+            let mindHeight =  linkEl.getAttribute("height");
+            // debugger;
+            if (mindHeight === null || mindHeight === "0") {
+                mindHeight='400';
+            }
+            mindHeight+='px';
 
-        linkEl.empty();
-        linkEl.style.height='400px';
-        linkEl.style.width = "100%";
-        const data =await this.app.vault.read(file);
-        createApp(SimpleMindMap, {
-                mindFile:file,
-                initMindData: JSON.parse(data),
-                app: this.app,
-                mode: 'preview',
-                contentEl:linkEl,
-                showMiniMap: false,
-                showMindTools:false,
-                initNoteMode:'notSlide',
-                initElementHeight: mindHeight,
+            linkEl.empty();
+            linkEl.style.height='400px';
+            linkEl.style.width = "100%";
+            const data =await this.app.vault.read(file);
+            createApp(SimpleMindMap, {
+                    mindFile:file,
+                    initMindData: JSON.parse(data),
+                    app: this.app,
+                    mode: 'preview',
+                    contentEl:linkEl,
+                    showMiniMap: false,
+                    showMindTools:false,
+                    initNoteMode:'notSlide',
+                    initElementHeight: mindHeight,
 
-                leaf: context,
-                viewId: 0,
+                    leaf: context,
+                    viewId: 0,
 
             }).mount(linkEl);
+            
 
         }
     }
