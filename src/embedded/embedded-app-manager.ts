@@ -92,7 +92,7 @@ const processLinkEl = async (
     if (!src.endsWith(FILE_EXTENSION)) {
         return;
     }
-    debugger
+    
     //If the loom has already been loaded, we don't need to do anything else
     if (hasLoadedEmbeddedLoom(linkEl)) {
         //将mind的容器高度与挂载的dom保持一致，便于自定义高度
