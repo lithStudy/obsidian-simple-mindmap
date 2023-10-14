@@ -173,7 +173,7 @@ export default {
     //注册拖拽节点
     MindMap.usePlugin(Drag)
     //注册键盘导航
-    // MindMap.usePlugin(KeyboardNavigation)
+    MindMap.usePlugin(KeyboardNavigation)
     //注册小地图
     MindMap.usePlugin(MiniMap)
     // MindMap.usePlugin(RichText)
