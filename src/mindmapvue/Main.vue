@@ -53,6 +53,8 @@ import NodeNote from 'NodeEdit.vue'
 import NodeNoteContentShow from 'NodeNoteContentShow.vue'
 import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
 import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
+import Export from 'simple-mind-map/src/plugins/Export.js'
+import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
 
 
 
@@ -176,6 +178,9 @@ export default {
     MindMap.usePlugin(KeyboardNavigation)
     //注册小地图
     MindMap.usePlugin(MiniMap)
+    //导出
+    MindMap.usePlugin(Export)
+    MindMap.usePlugin(ExportPDF)
     // MindMap.usePlugin(RichText)
     // debugger;
     this.mindMap = new MindMap({
@@ -473,6 +478,7 @@ export default {
       
       this.app.workspace.off("node_active")
       this.app.workspace.off("markmind-vue-priority")
+      this.app.workspace.off("markmind-vue-export")
     },
     throttleSave: _.throttle(function (mindDataTempParam){
         console.log("准备保存：throttle")

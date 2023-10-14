@@ -50,6 +50,8 @@ export default function EditingViewPlugin(
 
                 app.workspace.off("activeRemarkInput")
                 app.workspace.off("markmind-vue-priority")
+                app.workspace.off("markmind-vue-export")
+                
                 
                 
                 console.log("销毁编辑插件")
