@@ -286,6 +286,125 @@ export default class SamplePlugin extends Plugin {
                 return false;
             },
         });
+        //导出-图片
+        this.addCommand({
+            id: "export-png",
+            name: "export-png",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('png',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+        //导出-pdf
+        this.addCommand({
+            id: "export-pdf",
+            name: "export-pdf",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('pdf',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+        //导出-svg
+        this.addCommand({
+            id: "export-svg",
+            name: "export-svg",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('svg',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+        //导出-json
+        this.addCommand({
+            id: "export-json",
+            name: "export-json",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('json',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+        //导出-md
+        this.addCommand({
+            id: "export-md",
+            name: "export-md",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('md',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+        //导出-md拷贝
+        this.addCommand({
+            id: "export-md-copy",
+            name: "export-md-copy",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('md-copy',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+         //导出-smm原始问家里
+         this.addCommand({
+            id: "export-smm",
+            name: "export-smm",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('smm',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
 
     }
 
@@ -374,6 +493,51 @@ export default class SamplePlugin extends Plugin {
             
 
         }
+    }
+
+
+    private exportData(exportType:string,fileName:string|"思维导图"){
+        if(exportType=='md-copy'){
+            this.app.workspace.trigger("markmind-vue-export",        
+                exportType                
+            )
+        }else if (exportType === 'svg') {
+            this.app.workspace.trigger("markmind-vue-export",        
+              exportType,
+              true,
+              fileName,
+              `* {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }`
+            )
+          } else if (exportType==='smm') {
+            this.app.workspace.trigger("markmind-vue-export",
+              exportType,
+              true,
+              fileName,
+              true
+            )
+          } else if (exportType==='json') {
+            this.app.workspace.trigger("markmind-vue-export",
+              exportType,
+              true,
+              fileName,
+              false
+            )
+          }else if (exportType === 'png') {
+            this.app.workspace.trigger("markmind-vue-export",
+              exportType,
+              true,
+              fileName,
+              true
+            )
+          } else if (exportType === 'pdf') {
+            this.app.workspace.trigger("markmind-vue-export", exportType, true, fileName, false)
+          } else {
+            this.app.workspace.trigger("markmind-vue-export", exportType, true, fileName)
+          }
     }
 
     // async loadSettings() {

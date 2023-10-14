@@ -150,6 +150,7 @@ export class MufengMindMapView extends TextFileView {
 
         this.app.workspace.off("activeRemarkInput")
         this.app.workspace.off("markmind-vue-priority")
+        this.app.workspace.off("markmind-vue-export")
     }
 
 

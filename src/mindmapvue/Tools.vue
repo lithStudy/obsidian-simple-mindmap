@@ -9,6 +9,7 @@
       <div @click="resize()" class="toolsButton">重定位</div>
       <div @click="remark()" class="toolsButton">备注</div>
       <div @click="priority()" class="toolsButton">优先级</div>
+      <div @click="exportPng()" class="toolsButton">导出</div>
     
     </div>
   </div>
@@ -17,6 +18,9 @@
 
 <script>
 // import { useEmitter  } from 'vue'
+import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
+import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown.js'
+import { Notice } from "obsidian";
 
 export default {
   props: {
@@ -59,6 +63,8 @@ export default {
 
     this.app.workspace.on("markmind-vue-priority",this.priority)
 
+    this.app.workspace.on("markmind-vue-export",this.exportData)
+
     
     
     
@@ -74,6 +80,7 @@ export default {
   destroyed() {
     this.app.workspace.off("css-change");
     this.app.workspace.off("markmind-vue-priority");
+    this.app.workspace.off("markmind-vue-export")
   },
   methods: {
     resize(){
@@ -152,6 +159,25 @@ export default {
       }else{
         node.setIcon(["priority_1"])
       }
+    },
+    exportData(...args){
+      if(args[0]==='md-copy'){
+        let data = this.mindMap.getData()
+        let content = transformToMarkdown(data)
+        navigator.clipboard.writeText(content).then(() => {
+          new Notice("已将md内容复制到剪切板");        
+        }).catch((err) => {
+          new Notice("md内容复制到剪切板失败");
+        });
+
+      }else{
+        try {
+          this.mindMap.export(...args)
+        } catch (error) {
+          console.log(error)
+        }
+      }
+      
     }
 
   }
