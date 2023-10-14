@@ -388,6 +388,23 @@ export default class SamplePlugin extends Plugin {
                 return false;
             },
         });
+         //导出-smm原始问家里
+         this.addCommand({
+            id: "export-smm",
+            name: "export-smm",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        const activeFile=this.app.workspace.getActiveFile();
+                        this.exportData('smm',activeFile.basename)
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
 
     }
 
