@@ -202,7 +202,7 @@ export default class SamplePlugin extends Plugin {
         this.addCommand({
             id: "create",
             name: "Create mindMap",
-            hotkeys: [{ modifiers: ["Mod", "Shift"], key: "=" }],
+            // hotkeys: [{ modifiers: ["Mod", "Shift"], key: "=" }],
             callback: async () => {
                 await this.newMindMapFile(null);
             },
@@ -211,7 +211,7 @@ export default class SamplePlugin extends Plugin {
         this.addCommand({
             id: "create-and-embed",
             name: "Create mindMap and embed it into current file",
-            hotkeys: [{ modifiers: ["Mod", "Shift"], key: "+" }],
+            // hotkeys: [{ modifiers: ["Mod", "Shift"], key: "+" }],
             editorCallback: async (editor) => {
                 const filePath = await this.newMindMapFile(null, true);
                 if (!filePath) return;
@@ -269,6 +269,41 @@ export default class SamplePlugin extends Plugin {
                     this.setMindMapView(markdownView.leaf);
                 }
             }
+        });
+
+        //激活备注
+        this.addCommand({
+            id: "remark",
+            name: "remark",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        //激活备注输入框
+                        this.app.workspace.trigger("activeRemarkInput")
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+        //设置优先级
+        this.addCommand({
+            id: "priority",
+            name: "priority",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        //优先级
+                        this.app.workspace.trigger("markmind-vue-priority")
+                    }
+                    return true;
+                }
+                return false;
+            },
         });
 
     }

@@ -78,6 +78,8 @@ export default {
       this.updateTheme()
     }, this.app)
 
+    
+
   },
   destroyed() {
     this.mindMap.on('data_change', this.data_change)

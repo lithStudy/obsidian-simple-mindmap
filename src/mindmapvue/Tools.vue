@@ -8,6 +8,7 @@
     >
       <div @click="resize()" class="toolsButton">重定位</div>
       <div @click="remark()" class="toolsButton">备注</div>
+      <div @click="priority()" class="toolsButton">优先级</div>
     </div>
   </div>
 
@@ -55,6 +56,12 @@ export default {
       this.updateTheme()
     },this.app)
 
+    this.app.workspace.on("markmind-vue-priority",this.priority)
+
+    
+    
+    
+
     // this.mindMap.on("node_active",(node)=>{
     //   if (!node) {
     //     return
@@ -65,6 +72,7 @@ export default {
   },
   destroyed() {
     this.app.workspace.off("css-change");
+    this.app.workspace.off("markmind-vue-priority");
   },
   methods: {
     resize(){
@@ -121,6 +129,28 @@ export default {
         this.top=relativeTop
         this.remarkTop = this.top
         this.remarkRight = this.right+130
+    },
+    priority(){
+      if (this.mindMap.renderer.activeNodeList.length <= 0) {
+        return
+      }
+      const node=this.mindMap.renderer.activeNodeList[0]
+      const existIcon = node.getData('icon')
+      if(existIcon && existIcon[0]){
+        //循环三级优先级
+        let oldNum = existIcon[0].split('_')[1];
+        oldNum++;
+        //第4次清除优先级
+        oldNum = oldNum % 4
+        if(oldNum===0){
+          node.setIcon([])
+        }else{
+          node.setIcon(['priority_'+oldNum])
+        }
+        
+      }else{
+        node.setIcon(["priority_1"])
+      }
     },
 
   }

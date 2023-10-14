@@ -47,6 +47,11 @@ export default function EditingViewPlugin(
                 app.workspace.off("showNoteContent")
                 app.workspace.off("hideNoteContent")
                 app.workspace.off("node_active")
+
+                app.workspace.off("activeRemarkInput")
+                app.workspace.off("markmind-vue-priority")
+                
+                
                 console.log("销毁编辑插件")
             }
         }
