@@ -156,6 +156,16 @@ export default {
     }
 
     this.el_temp = this.contentEl.querySelector("#mindMapContainer");
+
+    const elRect = this.el_temp.getBoundingClientRect()
+    // 画布宽高
+    const containerWidth =elRect.width
+    const containerHeight = elRect.height
+    if (containerWidth <= 0 || containerHeight <= 0){
+        console.log("不存在可用的画布容器")
+        return
+    }
+
     // debugger
     //设置样式
     // el_temp.style.width ='6000px'

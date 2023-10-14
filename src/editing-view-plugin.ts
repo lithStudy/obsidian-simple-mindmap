@@ -19,7 +19,7 @@ export default function EditingViewPlugin(
              */
             update(update: ViewUpdate) {
                 // debugger
-                // console.log('EditingViewPlugin start')
+                console.log('EditingViewPlugin start')
                 const markdownLeaves =
                     app.workspace.getLeavesOfType("markdown");
                 const activeLeaf = markdownLeaves.find(

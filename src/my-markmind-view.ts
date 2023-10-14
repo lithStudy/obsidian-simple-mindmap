@@ -71,10 +71,12 @@ export class MufengMindMapView extends TextFileView {
                     console.log("导图容器不在视窗内")
                 }
                 //debugger
+                const mindContainerId = Math.random();
                 this.mindApp = createApp(SimpleMindMap, {
                     leaf: this.leaf,
                     viewId: this.viewId,
                     mindFile: this.file,
+                    mindContainerId: mindContainerId,
                     initMindData: this.markMindData,
                     app: this.app,
                     mode: 'edit',
