@@ -24,9 +24,14 @@
 
     <div id="node" v-if="noteMode === 'slide'" >
       <div id="remarkDiv" class="remarkDiv" :style="{ height: mydata.initHeight }">
-        <textarea id="nodeNote"  class="remarkTextarea" v-model="noteContext" @input="handleTextarea">111</textarea>
+        <textarea id="nodeNote"  class="remarkTextarea" v-model="noteContext" 
+          @input="handleTextarea"
+          @focus="handleTextareaForFocus"
+          @blur="handleTextareaForBlur"
+          @keydown.esc="handleTextareaEsc">111</textarea>
       </div>
     </div>
+    <!-- <NodeNote></NodeNote> -->
 
   </div>
 </template>
@@ -44,9 +49,11 @@ import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} fro
 import _ from "lodash";
 import Navigator from 'Navigator.vue'
 import MindTools from 'Tools.vue'
+import NodeNote from 'NodeEdit.vue'
 import NodeNoteContentShow from 'NodeNoteContentShow.vue'
 import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
 import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
+
 
 
 const THROTTLE_TIME_MILLIS = 3000;
@@ -56,7 +63,8 @@ export default {
   components: {
     Navigator,
     MindTools,
-    NodeNoteContentShow
+    NodeNoteContentShow,
+    NodeNote
   },
   props: {
     mindFile: {
@@ -148,6 +156,16 @@ export default {
     }
 
     this.el_temp = this.contentEl.querySelector("#mindMapContainer");
+
+    const elRect = this.el_temp.getBoundingClientRect()
+    // 画布宽高
+    const containerWidth =elRect.width
+    const containerHeight = elRect.height
+    if (containerWidth <= 0 || containerHeight <= 0){
+        console.log("不存在可用的画布容器")
+        return
+    }
+
     // debugger
     //设置样式
     // el_temp.style.width ='6000px'
@@ -264,6 +282,20 @@ export default {
       }
     })
 
+    this.app.workspace.on("activeRemarkInput", () => {
+      //存在激活的节点时才继续
+      if (this.mindMap.renderer.activeNodeList.length <= 0) {
+        return
+      }
+      // 找到了指定的 textarea 元素，触发焦点
+      const textareaElement = document.getElementById("nodeNote") as HTMLTextAreaElement;
+      if (textareaElement) {
+          textareaElement.focus();
+      }
+
+    })
+
+
     if(this.mindMap){
       this.mindMapReady = true;
 
@@ -306,6 +338,19 @@ export default {
       //
       // }
     },
+    handleTextareaForFocus(){
+      this.mindMap.keyCommand.pause();
+      console.log("获取焦点，暂停快捷键")
+    },
+    handleTextareaForBlur(){
+      this.mindMap.keyCommand.recovery();
+      console.log("失去焦点，恢复快捷键")
+    },
+    handleTextareaEsc(event){
+      if (event.key === 'Escape') {
+        event.target.blur();
+      }
+    },
     setPosition() {
       // debugger
       // 获取父容器和子元素
@@ -347,6 +392,9 @@ export default {
       //   this.mydata.noteContainerWidth='20%'
       // }
 
+
+    },
+    remarkInputActive(){
 
     },
     /**
@@ -422,7 +470,9 @@ export default {
 
       this.app.workspace.off("showNoteContent")
       this.app.workspace.off("hideNoteContent")
+      
       this.app.workspace.off("node_active")
+      this.app.workspace.off("markmind-vue-priority")
     },
     throttleSave: _.throttle(function (mindDataTempParam){
         console.log("准备保存：throttle")
@@ -469,9 +519,9 @@ export default {
   cursor: pointer;
   user-select: none;
 
-  .remarkTextarea{
+}
+.remarkTextarea{
     height: 100%;
     width: 100%
-  }
 }
 </style>

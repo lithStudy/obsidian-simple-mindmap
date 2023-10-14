@@ -1,24 +1,34 @@
 <template>
   <el-dialog
       class="nodeNoteDialog"
-      :title="$t('nodeNote.title')"
+      :title="111"
       :visible.sync="dialogVisible"
       width="500"
   >
-    <!-- <el-input
+    <!-- <textarea
+      type="textarea"
+      style="height: 200px;width: 200px;"
+      :autosize="{ minRows: 3, maxRows: 5 }"
+      placeholder="请输入内容"
+      v-model="note"
+    >
+    </textarea> -->
+
+    <el-input
       type="textarea"
       :autosize="{ minRows: 3, maxRows: 5 }"
       placeholder="请输入内容"
       v-model="note"
     >
-    </el-input> -->
-    <div class="noteEditor" ref="noteEditor" @keyup.stop @keydown.stop></div>
+    </el-input>
+    
+    <!-- <div class="noteEditor" ref="noteEditor" @keyup.stop @keydown.stop></div> -->
+
     <!-- <div class="tip">换行请使用：Enter+Shift</div> -->
+    
     <span slot="footer" class="dialog-footer">
-      <el-button @click="cancel">{{ $t('dialog.cancel') }}</el-button>
-      <el-button type="primary" @click="confirm">{{
-          $t('dialog.confirm')
-        }}</el-button>
+      <el-button @click="cancel">取消</el-button>
+      <el-button type="primary" @click="confirm">确认</el-button>
     </span>
   </el-dialog>
 </template>
@@ -36,19 +46,19 @@ export default {
   name: 'NodeNote',
   data() {
     return {
-      dialogVisible: false,
+      dialogVisible: true,
       note: '',
       activeNodes: [],
       editor: null
     }
   },
   created() {
-    this.$bus.$on('node_active', this.handleNodeActive)
-    this.$bus.$on('showNodeNote', this.handleShowNodeNote)
+    // this.$bus.$on('node_active', this.handleNodeActive)
+    // this.$bus.$on('showNodeNote', this.handleShowNodeNote)
   },
   beforeDestroy() {
-    this.$bus.$off('node_active', this.handleNodeActive)
-    this.$bus.$off('showNodeNote', this.handleShowNodeNote)
+    // this.$bus.$off('node_active', this.handleNodeActive)
+    // this.$bus.$off('showNodeNote', this.handleShowNodeNote)
   },
   methods: {
     handleNodeActive(...args) {
@@ -114,6 +124,12 @@ export default {
 
 <style lang="less" scoped>
 .nodeNoteDialog {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0px;
+  top: 0px;
+  background: red;
   .tip {
     margin-top: 5px;
     color: #dcdfe6;

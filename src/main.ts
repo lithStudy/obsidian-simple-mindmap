@@ -77,10 +77,10 @@ export default class SamplePlugin extends Plugin {
          */
         this.addSettingTab(new SampleSettingTab(this.app, this));
 
-        this.registerView(
-            VIEW_TYPE_EXAMPLE,
-            (leaf) => new ExampleView(leaf)
-          );
+        // this.registerView(
+        //     VIEW_TYPE_EXAMPLE,
+        //     (leaf) => new ExampleView(leaf)
+        //   );
 
         // this.addRibbonIcon("dice", "Activate view", () => {
         //     this.activateTestView();
@@ -94,9 +94,9 @@ export default class SamplePlugin extends Plugin {
         //注册打开特定扩展名的视图
         this.registerExtensions(["mind"], MUFENG_MARKMIND_VIEW);
 
-        this.addRibbonIcon("dice", "mufeng view", () => {
-            this.activateTestView();
-        });
+        // this.addRibbonIcon("dice", "mufeng view", () => {
+        //     this.activateTestView();
+        // });
 
         //注册命令
         this.registerCommands();
@@ -108,45 +108,20 @@ export default class SamplePlugin extends Plugin {
 
         //注册mind预览模式下后处理器
         this.registerMarkdownPostProcessor(async (element, context) => {
-          const linkEl = element.querySelector(".internal-embed");
-          if(linkEl){
-            const src = linkEl.getAttribute("src");
-            //只处理mind后缀的
-            if (src?.endsWith(FILE_EXTENSION)){
-              if (src){
-                const file  = this.app.metadataCache.getFirstLinkpathDest(src, context.sourcePath)
-                if(file){
-                  let mindHeight =  linkEl.getAttribute("height");
-                  // debugger;
-                  if (mindHeight === null || mindHeight === "0") {
-                    mindHeight='400';
-                  }
-                  mindHeight+='px';
+            const linkEls = element.querySelectorAll(".internal-embed");
+            if(linkEls){
+                linkEls.forEach((linkEl)=>{
+                    const src = linkEl.getAttribute("src");
+                    //只处理mind后缀的
+                    if (src?.endsWith(FILE_EXTENSION)){
+                        
+                      if (src){
+                        this.loadMind(src,context,linkEl);
+                      }
+                    }
 
-                  linkEl.empty();
-                  linkEl.style.height='400px';
-                  linkEl.style.width = "100%";
-                  const data =await this.app.vault.read(file);
-                  createApp(SimpleMindMap, {
-                        mindFile:file,
-                        initMindData: JSON.parse(data),
-                        app: this.app,
-                        mode: 'preview',
-                        contentEl:linkEl,
-                        showMiniMap: false,
-                        showMindTools:false,
-                        initNoteMode:'notSlide',
-                        initElementHeight: mindHeight,
-
-                        leaf: context,
-                        viewId: 0,
-
-                    }).mount(linkEl);
-
-                }
-              }
+                })  
             }
-          }
         });
 
     }
@@ -161,7 +136,8 @@ export default class SamplePlugin extends Plugin {
      * 插件所调用的所有资源必须在这里得到释放, 以防止插件被禁用后对 Obsidian 的性能产生影响.
      */
     onunload() {
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE_EXAMPLE);
+        console.log("main onunload")
+        // this.app.workspace.detachLeavesOfType(VIEW_TYPE_EXAMPLE);
         this.app.workspace.detachLeavesOfType(MUFENG_MARKMIND_VIEW);
     }
 
@@ -198,11 +174,13 @@ export default class SamplePlugin extends Plugin {
         } as ViewState);
     }
 
+
+
     registerCommands() {
         this.addCommand({
             id: "create",
             name: "Create mindMap",
-            hotkeys: [{ modifiers: ["Mod", "Shift"], key: "=" }],
+            // hotkeys: [{ modifiers: ["Mod", "Shift"], key: "=" }],
             callback: async () => {
                 await this.newMindMapFile(null);
             },
@@ -211,7 +189,7 @@ export default class SamplePlugin extends Plugin {
         this.addCommand({
             id: "create-and-embed",
             name: "Create mindMap and embed it into current file",
-            hotkeys: [{ modifiers: ["Mod", "Shift"], key: "+" }],
+            // hotkeys: [{ modifiers: ["Mod", "Shift"], key: "+" }],
             editorCallback: async (editor) => {
                 const filePath = await this.newMindMapFile(null, true);
                 if (!filePath) return;
@@ -271,6 +249,41 @@ export default class SamplePlugin extends Plugin {
             }
         });
 
+        //激活备注
+        this.addCommand({
+            id: "remark",
+            name: "remark",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        //激活备注输入框
+                        this.app.workspace.trigger("activeRemarkInput")
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+        //设置优先级
+        this.addCommand({
+            id: "priority",
+            name: "priority",
+            checkCallback: (checking: boolean) => {
+                const loomView =
+                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
+                if (loomView) {
+                    if (!checking) {
+                        //优先级
+                        this.app.workspace.trigger("markmind-vue-priority")
+                    }
+                    return true;
+                }
+                return false;
+            },
+        });
+
     }
 
     private getFolderForNewLoomFile(contextMenuFolderPath: string | null) {
@@ -318,6 +331,40 @@ export default class SamplePlugin extends Plugin {
             active: true,
             state: { file: filePath },
         });
+    }
+
+
+    private async loadMind(src,context,linkEl){
+        const file  = this.app.metadataCache.getFirstLinkpathDest(src, context.sourcePath)
+        if(file){
+        let mindHeight =  linkEl.getAttribute("height");
+        // debugger;
+        if (mindHeight === null || mindHeight === "0") {
+            mindHeight='400';
+        }
+        mindHeight+='px';
+
+        linkEl.empty();
+        linkEl.style.height='400px';
+        linkEl.style.width = "100%";
+        const data =await this.app.vault.read(file);
+        createApp(SimpleMindMap, {
+                mindFile:file,
+                initMindData: JSON.parse(data),
+                app: this.app,
+                mode: 'preview',
+                contentEl:linkEl,
+                showMiniMap: false,
+                showMindTools:false,
+                initNoteMode:'notSlide',
+                initElementHeight: mindHeight,
+
+                leaf: context,
+                viewId: 0,
+
+            }).mount(linkEl);
+
+        }
     }
 
     // async loadSettings() {

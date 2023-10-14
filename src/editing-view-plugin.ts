@@ -19,7 +19,7 @@ export default function EditingViewPlugin(
              */
             update(update: ViewUpdate) {
                 // debugger
-                // console.log('EditingViewPlugin start')
+                console.log('EditingViewPlugin start')
                 const markdownLeaves =
                     app.workspace.getLeavesOfType("markdown");
                 const activeLeaf = markdownLeaves.find(
@@ -47,6 +47,11 @@ export default function EditingViewPlugin(
                 app.workspace.off("showNoteContent")
                 app.workspace.off("hideNoteContent")
                 app.workspace.off("node_active")
+
+                app.workspace.off("activeRemarkInput")
+                app.workspace.off("markmind-vue-priority")
+                
+                
                 console.log("销毁编辑插件")
             }
         }

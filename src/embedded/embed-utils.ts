@@ -15,7 +15,8 @@ export const getEmbeddedLoomLinkEls = (
 			: contentEl.querySelector(".markdown-reading-view");
 
 	if (el) {
-		const embeddedLinkEls = el.querySelectorAll(".internal-embed");
+		const embeddedLinkEls = el.querySelectorAll("div > .internal-embed");
+		debugger
 		for (let i = 0; i < embeddedLinkEls.length; i++) {
 			const linkEl = embeddedLinkEls[i];
 			const src = linkEl.getAttribute("src");

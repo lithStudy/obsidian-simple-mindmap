@@ -71,10 +71,12 @@ export class MufengMindMapView extends TextFileView {
                     console.log("导图容器不在视窗内")
                 }
                 //debugger
+                const mindContainerId = Math.random();
                 this.mindApp = createApp(SimpleMindMap, {
                     leaf: this.leaf,
                     viewId: this.viewId,
                     mindFile: this.file,
+                    mindContainerId: mindContainerId,
                     initMindData: this.markMindData,
                     app: this.app,
                     mode: 'edit',
@@ -105,12 +107,13 @@ export class MufengMindMapView extends TextFileView {
     //
     setViewData(data: string, clear: boolean) {
         this.markMindData = JSON.parse(data);
-
         //clear为true，说明正在打开另一个文件
         if (clear) {
             if (this.mindApp) {
                 console.log("卸载myapp")
                 this.mindApp.unmount();
+                this.markMind=null;
+                this.onClose();
             }
             console.log('gggggggggggggg');
             this.initMind();
@@ -143,6 +146,10 @@ export class MufengMindMapView extends TextFileView {
         this.app.workspace.off("css-change");
         this.app.workspace.off("quick-preview")
         this.app.workspace.off("active-leaf-change")
+        this.app.workspace.off("activeRemarkInput")
+
+        this.app.workspace.off("activeRemarkInput")
+        this.app.workspace.off("markmind-vue-priority")
     }
 
 
