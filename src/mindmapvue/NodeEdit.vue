@@ -53,12 +53,8 @@ export default {
     }
   },
   created() {
-    // this.$bus.$on('node_active', this.handleNodeActive)
-    // this.$bus.$on('showNodeNote', this.handleShowNodeNote)
   },
   beforeDestroy() {
-    // this.$bus.$off('node_active', this.handleNodeActive)
-    // this.$bus.$off('showNodeNote', this.handleShowNodeNote)
   },
   methods: {
     handleNodeActive(...args) {

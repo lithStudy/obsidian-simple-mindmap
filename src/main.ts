@@ -13,13 +13,17 @@ import {
     normalizePath,
 } from 'obsidian';
 import {SampleSettingTab} from "./setting-tab";
-import {ExampleView, VIEW_TYPE_EXAMPLE} from "./test-view";
-import {MufengMindMapView, MUFENG_MARKMIND_VIEW} from "./my-markmind-view"
-import EditingViewPlugin from "./editing-view-plugin";
+import {MufengMindMapView, MUFENG_MARKMIND_VIEW} from "./mindmap-edit-view"
+import PreviewPlugin from "./mindmap-embedded-view";
 import {getEmbeddedLoomLinkEls, findEmbeddedLoomFile} from "./embedded/embed-utils"
 import {createApp, App as VueApp} from "vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
-import {FILE_EXTENSION} from "./constants/constant";
+import {
+    EVENT_APP_MIND_EXPORT,
+    EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE,
+    EVENT_APP_MIND_NODE_PRIORITY,
+    FILE_EXTENSION
+} from "./constants/constant";
 import {createMindMapFile} from "./utils/loom-file";
 import {getBasename} from "./utils/link-utils";
 
@@ -77,15 +81,6 @@ export default class SamplePlugin extends Plugin {
          */
         this.addSettingTab(new SampleSettingTab(this.app, this));
 
-        // this.registerView(
-        //     VIEW_TYPE_EXAMPLE,
-        //     (leaf) => new ExampleView(leaf)
-        //   );
-
-        // this.addRibbonIcon("dice", "Activate view", () => {
-        //     this.activateTestView();
-        // });
-
 
         this.registerView(
             MUFENG_MARKMIND_VIEW,
@@ -103,7 +98,7 @@ export default class SamplePlugin extends Plugin {
 
         //注册编辑器扩展
         this.registerEditorExtension(
-            EditingViewPlugin(this.app, this.manifest.version)
+            PreviewPlugin(this.app, this.manifest.version)
         );
 
         //注册mind预览模式下后处理器
@@ -140,21 +135,7 @@ export default class SamplePlugin extends Plugin {
      */
     onunload() {
         console.log("main onunload")
-        // this.app.workspace.detachLeavesOfType(VIEW_TYPE_EXAMPLE);
         this.app.workspace.detachLeavesOfType(MUFENG_MARKMIND_VIEW);
-    }
-
-    async activateTestView() {
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE_EXAMPLE);
-
-        await this.app.workspace.getRightLeaf(false).setViewState({
-            type: VIEW_TYPE_EXAMPLE,
-            active: true,
-        });
-
-        this.app.workspace.revealLeaf(
-            this.app.workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE)[0]
-        );
     }
 
 
@@ -262,7 +243,7 @@ export default class SamplePlugin extends Plugin {
                 if (loomView) {
                     if (!checking) {
                         //激活备注输入框
-                        this.app.workspace.trigger("activeRemarkInput")
+                        this.app.workspace.trigger(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
                     }
                     return true;
                 }
@@ -279,7 +260,7 @@ export default class SamplePlugin extends Plugin {
                 if (loomView) {
                     if (!checking) {
                         //优先级
-                        this.app.workspace.trigger("markmind-vue-priority")
+                        this.app.workspace.trigger(EVENT_APP_MIND_NODE_PRIORITY)
                     }
                     return true;
                 }
@@ -408,7 +389,7 @@ export default class SamplePlugin extends Plugin {
 
     }
 
-    private getFolderForNewLoomFile(contextMenuFolderPath: string | null) {
+    private getFolderForNewMindFile(contextMenuFolderPath: string | null) {
         let folderPath = "";
 
         if (contextMenuFolderPath) {
@@ -436,7 +417,7 @@ export default class SamplePlugin extends Plugin {
         contextMenuFolderPath: string | null,
         embedded?: boolean
     ) {
-        const folderPath = this.getFolderForNewLoomFile(contextMenuFolderPath);
+        const folderPath = this.getFolderForNewMindFile(contextMenuFolderPath);
         const filePath = await createMindMapFile(
             this.app,
             folderPath,
@@ -498,11 +479,11 @@ export default class SamplePlugin extends Plugin {
 
     private exportData(exportType:string,fileName:string|"思维导图"){
         if(exportType=='md-copy'){
-            this.app.workspace.trigger("markmind-vue-export",        
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
                 exportType                
             )
         }else if (exportType === 'svg') {
-            this.app.workspace.trigger("markmind-vue-export",        
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
               exportType,
               true,
               fileName,
@@ -513,30 +494,30 @@ export default class SamplePlugin extends Plugin {
               }`
             )
           } else if (exportType==='smm') {
-            this.app.workspace.trigger("markmind-vue-export",
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
               exportType,
               true,
               fileName,
               true
             )
           } else if (exportType==='json') {
-            this.app.workspace.trigger("markmind-vue-export",
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
               exportType,
               true,
               fileName,
               false
             )
           }else if (exportType === 'png') {
-            this.app.workspace.trigger("markmind-vue-export",
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
               exportType,
               true,
               fileName,
               true
             )
           } else if (exportType === 'pdf') {
-            this.app.workspace.trigger("markmind-vue-export", exportType, true, fileName, false)
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT, exportType, true, fileName, false)
           } else {
-            this.app.workspace.trigger("markmind-vue-export", exportType, true, fileName)
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT, exportType, true, fileName)
           }
     }
 

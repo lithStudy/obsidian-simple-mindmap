@@ -9,8 +9,6 @@
       <div @click="resize()" class="toolsButton">重定位</div>
       <div @click="remark()" class="toolsButton">备注</div>
       <div @click="priority()" class="toolsButton">优先级</div>
-      <div @click="exportPng()" class="toolsButton">导出</div>
-    
     </div>
   </div>
 
@@ -21,6 +19,7 @@
 import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
 import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown.js'
 import { Notice } from "obsidian";
+import {EVENT_APP_CSS_CHANGE, EVENT_APP_MIND_EXPORT, EVENT_APP_MIND_NODE_PRIORITY} from "../constants/constant";
 
 export default {
   props: {
@@ -57,30 +56,19 @@ export default {
   mounted() {
     this.updateTheme()
     this.setPosition();
-    this.app.workspace.on("css-change", () => {
+    this.app.workspace.on(EVENT_APP_CSS_CHANGE, () => {
       this.updateTheme()
     },this.app)
 
-    this.app.workspace.on("markmind-vue-priority",this.priority)
+    this.app.workspace.on(EVENT_APP_MIND_NODE_PRIORITY,this.priority)
 
-    this.app.workspace.on("markmind-vue-export",this.exportData)
-
-    
-    
-    
-
-    // this.mindMap.on("node_active",(node)=>{
-    //   if (!node) {
-    //     return
-    //   }
-    //   this.remarkContent=node.getData('note');
-    // })
+    this.app.workspace.on(EVENT_APP_MIND_EXPORT,this.exportData)
 
   },
   destroyed() {
-    this.app.workspace.off("css-change");
-    this.app.workspace.off("markmind-vue-priority");
-    this.app.workspace.off("markmind-vue-export")
+    this.app.workspace.off(EVENT_APP_CSS_CHANGE);
+    this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY);
+    this.app.workspace.off(EVENT_APP_MIND_EXPORT)
   },
   methods: {
     resize(){

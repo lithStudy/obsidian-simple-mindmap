@@ -3,9 +3,19 @@ import {createApp, App as VueApp} from "vue";
 // import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
 import MindMap from "simple-mind-map";
-import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} from "./constants/constant";
+import {
+    EVENT_APP_CSS_CHANGE,
+    EVENT_APP_MIND_EMBEDDED_RESIZE,
+    EVENT_APP_LEAF_CHANGE_ACTIVE, EVENT_APP_MIND_EXPORT,
+    EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE,
+    EVENT_APP_MIND_NODE_PRIORITY,
+    EVENT_APP_QUICK_PREVIEW,
+    EVENT_APP_MIND_REFRESH,
+    EVENT_APP_RESIZE,
+    MARKMIND_DEFAULT_DATA
+} from "./constants/constant";
 
-export const MUFENG_MARKMIND_VIEW = "mufeng-markmind";
+export const MUFENG_MARKMIND_VIEW = "mufeng-mindmap";
 
 
 export class MufengMindMapView extends TextFileView {
@@ -36,7 +46,7 @@ export class MufengMindMapView extends TextFileView {
 
     initMind = () => {
         if (!this.markMind) {
-            console.log('initMind ddddd')
+            console.log('mind init')
             // debugger
             //重置dom节点
             this.contentEl.empty();
@@ -104,7 +114,7 @@ export class MufengMindMapView extends TextFileView {
         return JSON.stringify(this.markMindData);
     }
 
-    //
+    //obsidian保存数据
     setViewData(data: string, clear: boolean) {
         this.markMindData = JSON.parse(data);
         //clear为true，说明正在打开另一个文件
@@ -115,7 +125,6 @@ export class MufengMindMapView extends TextFileView {
                 this.markMind=null;
                 this.onClose();
             }
-            console.log('gggggggggggggg');
             this.initMind();
         }
 
@@ -130,9 +139,6 @@ export class MufengMindMapView extends TextFileView {
     async onOpen() {
         this.app.workspace.onLayoutReady(() => {
             console.log("open onLayoutReady")
-            // this.app.workspace.on("resize", this.initMind);
-            // this.initMind();
-
         })
     }
 
@@ -140,17 +146,16 @@ export class MufengMindMapView extends TextFileView {
         console.log('onClose')
         this.contentEl.empty();
         //重要：这个监听不销毁，会导致每次打开新的思维导图产生的vue实例无法销毁
-        this.app.workspace.off(EVENT_APP_REFRESH);
-        this.app.workspace.off(EVENT_APP_EMBEDDED_RESIZE);
-        this.app.workspace.off('resize');
-        this.app.workspace.off("css-change");
-        this.app.workspace.off("quick-preview")
-        this.app.workspace.off("active-leaf-change")
-        this.app.workspace.off("activeRemarkInput")
-
-        this.app.workspace.off("activeRemarkInput")
-        this.app.workspace.off("markmind-vue-priority")
-        this.app.workspace.off("markmind-vue-export")
+        this.app.workspace.off(EVENT_APP_MIND_REFRESH);
+        this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE);
+        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
+        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
+        this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY)
+        this.app.workspace.off(EVENT_APP_MIND_EXPORT)
+        this.app.workspace.off(EVENT_APP_RESIZE);
+        this.app.workspace.off(EVENT_APP_CSS_CHANGE);
+        this.app.workspace.off(EVENT_APP_QUICK_PREVIEW)
+        this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE)
     }
 
 
@@ -166,8 +171,8 @@ export class MufengMindMapView extends TextFileView {
     onload() {
         super.onload();
         this.registerEvent(
-            this.app.workspace.on("quick-preview", () => {
-                console.log('quick-preview')
+            this.app.workspace.on(EVENT_APP_QUICK_PREVIEW, () => {
+                console.log(EVENT_APP_QUICK_PREVIEW)
             }, this)
         );
 

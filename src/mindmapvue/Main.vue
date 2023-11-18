@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!--<span>{{mydata.compId}}</span>-->
+    <span>{{mydata.compId}}</span>
     <div id="mindMapContainer" :style="{ height: mydata.initHeight,width:mydata.mindMapContainerWidth }"></div>
     <Navigator v-if="showMiniMap && mindMapReady"
                :mindMap="mindMap"
@@ -12,7 +12,7 @@
                 :mindMap="mindMap"
                 :app="app"
                 :contentEl="contentEl"
-                @remakModelToggle="remakModelToggle"
+                @remakModelToggle="remarkModelToggle"
     ></mind-tools>
 
     <NodeNoteContentShow
@@ -43,9 +43,27 @@ import {
 import MindMap from "simple-mind-map";
 import Drag from "simple-mind-map/src/plugins/Drag.js"
 import KeyboardNavigation from 'simple-mind-map/src/plugins/KeyboardNavigation.js'
+import RichText from 'simple-mind-map/src/plugins/RichText.js'
 import MiniMap from 'simple-mind-map/src/plugins/MiniMap.js'
 import {WorkspaceLeaf} from "obsidian";
-import {EVENT_APP_EMBEDDED_RESIZE, EVENT_APP_REFRESH, MARKMIND_DEFAULT_DATA} from "../constants/constant";
+import {
+  EVENT_APP_CSS_CHANGE,
+  EVENT_APP_MIND_EMBEDDED_RESIZE,
+  EVENT_APP_LEAF_CHANGE_ACTIVE,
+  EVENT_APP_MIND_EXPORT,
+  EVENT_MIND_NODE_ACTIVE,
+  EVENT_APP_MIND_NODE_REMARK_PREVIEW,
+  EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE,
+  EVENT_APP_MIND_NODE_PRIORITY,
+  EVENT_APP_QUICK_PREVIEW,
+  EVENT_APP_MIND_REFRESH,
+  EVENT_APP_RESIZE,
+  MARKMIND_DEFAULT_DATA,
+  EVENT_MIND_THEME_CHANGE,
+  EVENT_MIND_DATA_CHANGE,
+  EVENT_MIND_NODE_RENDER_END,
+  SAVE_THROTTLE_TIME_MILLIS
+} from "../constants/constant";
 import _ from "lodash";
 import Navigator from 'Navigator.vue'
 import MindTools from 'Tools.vue'
@@ -57,8 +75,6 @@ import Export from 'simple-mind-map/src/plugins/Export.js'
 import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
 
 
-
-const THROTTLE_TIME_MILLIS = 3000;
 
 export default {
   name: 'SimpleMindMap',
@@ -143,9 +159,6 @@ export default {
 
     this.mydata.compId = Math.random();
 
-
-    // debugger
-
     this.mydata.mindMapData = {...this.mydata.mindMapData, ...this.initMindData};
     this.mydata.mindMode = this.mode || 'edit'
 
@@ -167,11 +180,6 @@ export default {
         console.log("不存在可用的画布容器")
         return
     }
-
-    // debugger
-    //设置样式
-    // el_temp.style.width ='6000px'
-    // el_temp.style.height ='6000px'
     //注册拖拽节点
     MindMap.usePlugin(Drag)
     //注册键盘导航
@@ -192,14 +200,14 @@ export default {
       enableFreeDrag: true,
       readonly: this.mydata.mindMode === 'preview' ? true : false,
       // initRootNodePosition: ['center', 'center'],
-      mousewheelAction: 'move',// zoom（放大缩小）、move（上下移动）
+      mousewheelAction: 'zoom',// zoom（放大缩小）、move（上下移动）
+      mousewheelZoomActionReverse:true,
       data: this.mydata.mindMapData,
       customNoteContentShow: {
         show: (content, left, top) => {
-          this.app.workspace.trigger('showNoteContent', content, left, top)
+          this.app.workspace.trigger(EVENT_APP_MIND_NODE_REMARK_PREVIEW, content, left, top)
         },
         hide: () => {
-          // this.$bus.$emit('hideNoteContent')
         }
       },
     });
@@ -213,7 +221,7 @@ export default {
       textEdit.show(this.mindMap.renderer.activeNodeList[0])
     })
 
-    this.mindMap.on('node_tree_render_end', (...args) => {
+    this.mindMap.on(EVENT_MIND_NODE_RENDER_END, (...args) => {
       // updateMiniMap();
       if (this.firstRender) {
         this.goTargetRoot();
@@ -225,52 +233,42 @@ export default {
     })
     // debugger
     //监控导图数据变更事件
-    this.mindMap.on('data_change', (...args) => {
+    this.mindMap.on(EVENT_MIND_DATA_CHANGE, (...args) => {
       this.throttleSave(args[0]);
     })
-    this.mindMap.on('view_theme_change', (...args) => {
+    this.mindMap.on(EVENT_MIND_THEME_CHANGE, (...args) => {
       console.log("样式调整mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)")
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
     })
 
     // let nodeNoteEl = this.contentEl.querySelector('#nodeNote');
-    this.mindMap.on("node_active",(node)=>{
+    this.mindMap.on(EVENT_MIND_NODE_ACTIVE,(node)=>{
       if (!node) {
         return
       }
       this.noteContext = node.getData('note');
     })
 
-    // if (nodeNoteEl) {
-    //   nodeNoteEl.addEventListener('input', (event) =>{
-    //     console.log("监听input")
-    //     // throttleSaveNote();
-    //     this.saveNote();
-    //     // 处理输入事件，使用获取到的 value ...
-    //   });
-    //
-    // }
-
     //监听刷新事件，刷新视图
     this.app.workspace.on(
-        EVENT_APP_REFRESH,
+        EVENT_APP_MIND_REFRESH,
         this.handleRefreshEvent
     );
 
-    this.app.workspace.on('resize', () => {
+    this.app.workspace.on(EVENT_APP_RESIZE, () => {
       // debugger;
       this.mindResize();
     })
 
     //嵌入模式动态修改容器尺寸事件
-    this.app.workspace.on(EVENT_APP_EMBEDDED_RESIZE, (leaf: WorkspaceLeaf)=>{
+    this.app.workspace.on(EVENT_APP_MIND_EMBEDDED_RESIZE, (leaf: WorkspaceLeaf)=>{
       //是当前页面，且是嵌入模式
       if (this.leaf.id === leaf.id && this.mode==='embedded-edit') {
         this.mindResize();
       }
     })
-
-    this.app.workspace.on("css-change", () => {
+    //跟随obsidian样式
+    this.app.workspace.on(EVENT_APP_CSS_CHANGE, () => {
       const el = document.querySelector("body");
       //是否深色模式
       if (el?.className.includes("theme-dark") ?? false) {
@@ -279,15 +277,15 @@ export default {
         this.mindMap.setTheme('default')
       }
     }, this.app)
-
-    this.app.workspace.on("active-leaf-change", (leaf: WorkspaceLeaf) => {
+    //监控obsidian窗口调整mind大小
+    this.app.workspace.on(EVENT_APP_LEAF_CHANGE_ACTIVE, (leaf: WorkspaceLeaf) => {
       if (!leaf) return;
       if (this.leaf.id === leaf.id) {
         this.mindResize();
       }
     })
 
-    this.app.workspace.on("activeRemarkInput", () => {
+    this.app.workspace.on(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, () => {
       //存在激活的节点时才继续
       if (this.mindMap.renderer.activeNodeList.length <= 0) {
         return
@@ -307,41 +305,13 @@ export default {
       this.setPosition();
     }
 
-    // debugger
-    //渲染小地图
-    // if (this.showMiniMap) {
-    //   createApp(Navigator, {
-    //     mindMap: this.mindMap,
-    //     app: this.app,
-    //     contentEl: this.contentEl
-    //   }).mount(this.contentEl.querySelector("#miniMap"));
-    // }
-    //渲染工具栏
-    // if (this.showMindTools){
-    //   createApp(MindTools, {
-    //     mindMap: this.mindMap,
-    //     app: this.app,
-    //     contentEl: this.contentEl
-    //   }).mount(this.contentEl.querySelector("#mindTools"));
-    // }
   },
   beforeDestroy() {
 
   },
   methods: {
     handleTextarea(){
-
       this.saveNote();
-      //
-      // if (nodeNoteEl) {
-      //   nodeNoteEl.addEventListener('input', (event) =>{
-      //     console.log("监听input")
-      //     // throttleSaveNote();
-      //     this.saveNote();
-      //     // 处理输入事件，使用获取到的 value ...
-      //   });
-      //
-      // }
     },
     handleTextareaForFocus(){
       this.mindMap.keyCommand.pause();
@@ -371,12 +341,7 @@ export default {
       this.left = relativeLeft
       this.top = relativeTop
     },
-    remakModelToggle(remarkMode){
-      console.log('remakModelToggle')
-      // if(remarkMode==='slide'){
-      //
-      // }
-      // debugger
+    remarkModelToggle(remarkMode){
       if(this.noteMode==='slide'){
         this.noteMode='notSlide';
         this.mydata.mindMapContainerWidth='100%';
@@ -389,17 +354,6 @@ export default {
         // debugger
         this.mindMap.resize();
       }, 10);
-
-
-      // if(this.noteMode==='notSlide'){
-      //   this.noteMode='slide';
-      //   this.mydata.mindMapContainerWidth='80%';
-      //   this.mydata.noteContainerWidth='20%'
-      // }
-
-
-    },
-    remarkInputActive(){
 
     },
     /**
@@ -444,7 +398,7 @@ export default {
       this.mindMap.renderer.activeNodeList[0].setNote(this.noteContext);
     },
     handleRefreshEvent(newCompId, newMindData, newFilePath){
-      console.log("准备刷新：" + this.mydata.compId)
+      console.log("监听到思维导图刷新事件，当前思维导图为：" + this.mydata.compId+"，通知刷新的思维导图为："+newCompId)
       //如果组件id不一样且文件是同一个，重新渲染，以保证相同文件在其他视图的数据也被修改了
       if (this.mydata.compId !== newCompId && newFilePath === this.mindFile.path) {
         console.log('监听到其他视图的刷新事件：当前视图id：' + this.mydata.compId + ",其他视图：" + newCompId)
@@ -466,27 +420,26 @@ export default {
       }
     },
     offListener(){
-      this.app.workspace.off(EVENT_APP_REFRESH);
-      this.app.workspace.off(EVENT_APP_EMBEDDED_RESIZE);
-      this.app.workspace.off('resize');
-      this.app.workspace.off("css-change")
-      this.app.workspace.off("quick-preview")
-      this.app.workspace.off("active-leaf-change")
+      this.app.workspace.off(EVENT_APP_MIND_REFRESH);
+      this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE);
+      this.app.workspace.off(EVENT_APP_RESIZE);
+      this.app.workspace.off(EVENT_APP_CSS_CHANGE)
+      this.app.workspace.off(EVENT_APP_QUICK_PREVIEW)
+      this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE)
 
-      this.app.workspace.off("showNoteContent")
-      this.app.workspace.off("hideNoteContent")
-      
-      this.app.workspace.off("node_active")
-      this.app.workspace.off("markmind-vue-priority")
-      this.app.workspace.off("markmind-vue-export")
+      this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW)
+
+      this.app.workspace.off(EVENT_MIND_NODE_ACTIVE)
+      this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY)
+      this.app.workspace.off(EVENT_APP_MIND_EXPORT)
     },
     throttleSave: _.throttle(function (mindDataTempParam){
-        console.log("准备保存：throttle")
+        console.log("准备保存：throttle:"+JSON.stringify(mindDataTempParam))
         //保存文件
         this.app.vault.modify(this.mindFile, JSON.stringify(mindDataTempParam));
         //触发刷新事件用于通知其他视图刷新
-        this.app.workspace.trigger(EVENT_APP_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
-      }, THROTTLE_TIME_MILLIS),
+        this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
+      }, SAVE_THROTTLE_TIME_MILLIS),
 
   }
 }
