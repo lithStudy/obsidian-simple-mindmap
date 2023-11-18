@@ -196,23 +196,23 @@ export default class SamplePlugin extends Plugin {
             },
         });
 
-        this.addCommand({
-            id: "export-markdown",
-            name: "Export as markdown",
-            checkCallback: (checking: boolean) => {
-                const loomView =
-                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
-                const markdownView =
-                    this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (loomView || markdownView) {
-                    if (!checking) {
-                        this.app.workspace.trigger(EVENT_DOWNLOAD_MARKDOWN);
-                    }
-                    return true;
-                }
-                return false;
-            },
-        });
+        // this.addCommand({
+        //     id: "export-markdown",
+        //     name: "Export as markdown",
+        //     checkCallback: (checking: boolean) => {
+        //         const loomView =
+        //             this.app.workspace.getActiveViewOfType(MufengMindMapView);
+        //         const markdownView =
+        //             this.app.workspace.getActiveViewOfType(MarkdownView);
+        //         if (loomView || markdownView) {
+        //             if (!checking) {
+        //                 this.app.workspace.trigger(EVENT_DOWNLOAD_MARKDOWN);
+        //             }
+        //             return true;
+        //         }
+        //         return false;
+        //     },
+        // });
 
         //添加命令：切换导图模式与源码模式
         this.addCommand({
