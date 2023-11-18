@@ -23,7 +23,13 @@
 </template>
 
 <script>
-import {inject} from 'vue'
+import _ from "lodash";
+import {
+  EVENT_APP_CSS_CHANGE,
+  EVENT_APP_MIND_REFRESH,
+  EVENT_MIND_DATA_CHANGE, EVENT_MIND_NODE_RENDER_END, EVENT_MIND_VIEW_DATA_CHANGE, MINIMAP_THROTTLE_TIME_MILLIS,
+  SAVE_THROTTLE_TIME_MILLIS
+} from "../constants/constant";
 
 export default {
   props: {
@@ -70,11 +76,11 @@ export default {
     this.init()
     this.setPosition();
 
-    this.mindMap.on('data_change', this.data_change)
-    this.mindMap.on('view_data_change', this.data_change)
-    this.mindMap.on('node_tree_render_end', this.data_change)
+    this.mindMap.on(EVENT_MIND_DATA_CHANGE, this.view_data_change)
+    this.mindMap.on(EVENT_MIND_VIEW_DATA_CHANGE, this.view_data_change)
+    this.mindMap.on(EVENT_MIND_NODE_RENDER_END, this.view_data_change)
 
-    this.app.workspace.on("css-change", () => {
+    this.app.workspace.on(EVENT_APP_CSS_CHANGE, () => {
       this.updateTheme()
     }, this.app)
 
@@ -82,10 +88,10 @@ export default {
 
   },
   destroyed() {
-    this.mindMap.on('data_change', this.data_change)
-    this.mindMap.off('view_data_change', this.data_change)
-    this.mindMap.off('node_tree_render_end', this.data_change)
-    this.app.workspace.off("css-change");
+    this.mindMap.off(EVENT_MIND_DATA_CHANGE, this.view_data_change)
+    this.mindMap.off(EVENT_MIND_VIEW_DATA_CHANGE, this.view_data_change)
+    this.mindMap.off(EVENT_MIND_NODE_RENDER_END, this.view_data_change)
+    this.app.workspace.off(EVENT_APP_CSS_CHANGE);
   },
   methods: {
     toggle_mini_map(show) {
@@ -99,16 +105,12 @@ export default {
         }
       })
     },
-    data_change() {
+    view_data_change() {
       if (!this.showMiniMap) {
         return
       }
-      this.drawMiniMap()
-      // clearTimeout(this.timer)
-      // this.timer = setTimeout(() => {
-      //   // this.setPosition();
-      //   this.drawMiniMap()
-      // }, 500)
+      this.throttleDrawMiniMap();
+      // this.drawMiniMap()
     },
     init() {
       let {width, height} = this.$refs.navigatorBox.getBoundingClientRect()
@@ -118,6 +120,7 @@ export default {
     },
 
     drawMiniMap() {
+      console.log('drawMiniMap,boxWidth:'+this.boxWidth+";boxHeight:"+this.boxHeight)
       let {
         svgHTML,
         viewBoxStyle,
@@ -136,6 +139,9 @@ export default {
       // this.init();
       // this.setPosition();
     },
+    throttleDrawMiniMap: _.throttle(function (){
+      this.drawMiniMap();
+    }, MINIMAP_THROTTLE_TIME_MILLIS),
 
     onMousedown(e) {
 

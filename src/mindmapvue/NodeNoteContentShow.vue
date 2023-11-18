@@ -14,6 +14,7 @@
 <script>
 import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer'
 import '@toast-ui/editor/dist/toastui-editor-viewer.css'
+import {EVENT_APP_MIND_NODE_REMARK_PREVIEW} from "../constants/constant";
 
 /**
  * @Author: 王林
@@ -42,9 +43,7 @@ export default {
     }
   },
   created() {
-    this.app.workspace.on('showNoteContent', this.onShowNoteContent)
-    this.app.workspace.on('hideNoteContent', this.hideNoteContent)
-    // this.app.workspace.on('node_active', this.hideNoteContent)
+    this.app.workspace.on(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
     this.contentEl.addEventListener('click', this.hideNoteContent)
     document.body.addEventListener('click', this.hideNoteContent)
   },
@@ -52,9 +51,7 @@ export default {
     this.initEditor()
   },
   beforeDestroy() {
-    this.app.workspace.off('showNoteContent', this.onShowNoteContent)
-    this.app.workspace.off('hideNoteContent', this.hideNoteContent)
-    // this.app.workspace.off('node_active', this.hideNoteContent)
+    this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
     document.body.removeEventListener('click', this.hideNoteContent)
   },
   methods: {

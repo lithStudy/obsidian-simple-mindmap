@@ -1,7 +1,7 @@
 import {App, MarkdownView, TFile, WorkspaceLeaf} from "obsidian";
 import {createApp, App as VueApp} from "vue";
 import SimpleMindMap from "../mindmapvue/Main.vue";
-import {FILE_EXTENSION,EVENT_APP_EMBEDDED_RESIZE} from "../constants/constant";
+import {FILE_EXTENSION,EVENT_APP_MIND_EMBEDDED_RESIZE} from "../constants/constant";
 
 import {
     findEmbeddedLoomFile,
@@ -28,7 +28,7 @@ export const loadPreviewModeApps = (
         const mode = view.getMode();
 
         if (mode === "preview")
-            loadEmbeddedLoomApps(app, manifestPluginVersion, leaf, "preview");
+            loadEmbeddedMindApps(app, manifestPluginVersion, leaf, "preview");
     }
 };
 
@@ -39,7 +39,7 @@ export const loadPreviewModeApps = (
  * @param markdownLeaf - The leaf that contains the markdown view
  * @param mode - The mode of the markdown view (source or preview)
  */
-export const loadEmbeddedLoomApps = (
+export const loadEmbeddedMindApps = (
     app: App,
     manifestPluginVersion: string,
     markdownLeaf: WorkspaceLeaf,
@@ -117,7 +117,7 @@ const processLinkEl = async (
         	// linkEl.style.width=containWidth
         	// linkEl.find('#mindMapContainer').style.width=containWidth
         	//TODO 通知remind容器尺寸发生了变化
-        	app.workspace.trigger(EVENT_APP_EMBEDDED_RESIZE,leaf)
+        	app.workspace.trigger(EVENT_APP_MIND_EMBEDDED_RESIZE,leaf)
         }
         return;
     }

@@ -1,6 +1,6 @@
 import { App, Notice, normalizePath } from "obsidian";
 import { createFile, createFolder } from "./file-operations";
-import {DEFAULT_LOOM_NAME, FILE_EXTENSION} from "../constants/constant";
+import {DEFAULT_FILE_NAME, FILE_EXTENSION} from "../constants/constant";
 
 export const createMindMapFile = async (
 	app: App,
@@ -19,7 +19,7 @@ export const createMindMapFile = async (
 };
 
 const getFileName = (): string => {
-	const fileName = DEFAULT_LOOM_NAME;
+	const fileName = DEFAULT_FILE_NAME;
 	return `${fileName}.${FILE_EXTENSION}`;
 };
 
