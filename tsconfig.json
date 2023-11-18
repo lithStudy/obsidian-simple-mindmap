@@ -9,7 +9,7 @@
     /*** Compiler Options. */
     /*** 编译选项. */
     "compilerOptions": {
-
+        "noEmit": true,
         /** Type Checking. */
         /** 类型检查. */
 
