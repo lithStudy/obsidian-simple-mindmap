@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span>{{mydata.compId}}</span>
+<!--    <span>{{mydata.compId}}</span>-->
     <div id="mindMapContainer" :style="{ height: mydata.initHeight,width:mydata.mindMapContainerWidth }"></div>
     <Navigator v-if="showMiniMap && mindMapReady"
                :mindMap="mindMap"
