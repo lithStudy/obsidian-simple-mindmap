@@ -11,9 +11,9 @@ import {
     EVENT_APP_MIND_NODE_PRIORITY,
     EVENT_APP_QUICK_PREVIEW,
     EVENT_APP_MIND_REFRESH,
-    EVENT_APP_RESIZE,
-    MARKMIND_DEFAULT_DATA
+    EVENT_APP_RESIZE
 } from "./constants/constant";
+import {fullOrginMindData, getRealMindData, MARKMIND_DEFAULT_REAL_DATA} from "./utils/mind-content-util";
 
 export const MUFENG_MARKMIND_VIEW = "mufeng-mindmap";
 
@@ -40,7 +40,7 @@ export class MufengMindMapView extends TextFileView {
         this.data = "";
         this.viewId = Math.random();
         this.markMind = null;
-        this.markMindData = {};
+        this.markMindData = MARKMIND_DEFAULT_REAL_DATA;
     }
 
 
@@ -51,11 +51,7 @@ export class MufengMindMapView extends TextFileView {
             //重置dom节点
             this.contentEl.empty();
             const newDiv = this.contentEl.createDiv({});
-            // newDiv.style.height = '1000px';
             newDiv.style.width = '100%';
-
-
-            const myId = Math.random();
 
             const paddingTop = parseFloat(getComputedStyle(this.contentEl).paddingTop);
             const paddingBottom = parseFloat(getComputedStyle(this.contentEl).paddingBottom);
@@ -109,14 +105,15 @@ export class MufengMindMapView extends TextFileView {
         }
     }
 
-    //obsidian获取数据
+    //obsidian保存数据
     getViewData() {
-        return JSON.stringify(this.markMindData);
+        return fullOrginMindData(this.markMindData);
     }
 
-    //obsidian保存数据
+    //从文件中获取数据并使用
     setViewData(data: string, clear: boolean) {
-        this.markMindData = JSON.parse(data);
+        // console.log('setViewData')
+        this.markMindData = getRealMindData(data);
         //clear为true，说明正在打开另一个文件
         if (clear) {
             if (this.mindApp) {
@@ -132,7 +129,7 @@ export class MufengMindMapView extends TextFileView {
 
     clear() {
         console.log("clear")
-        this.markMindData = {};
+        this.markMindData = MARKMIND_DEFAULT_REAL_DATA;
     }
 
 

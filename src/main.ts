@@ -26,6 +26,7 @@ import {
 } from "./constants/constant";
 import {createMindMapFile} from "./utils/loom-file";
 import {getBasename} from "./utils/link-utils";
+import {getRealMindData} from "./utils/mind-content-util";
 
 
 export interface MindSettings {
@@ -458,7 +459,7 @@ export default class SamplePlugin extends Plugin {
             const data =await this.app.vault.read(file);
             createApp(SimpleMindMap, {
                     mindFile:file,
-                    initMindData: JSON.parse(data),
+                    initMindData: getRealMindData(data),
                     app: this.app,
                     mode: 'preview',
                     contentEl:linkEl,

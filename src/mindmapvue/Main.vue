@@ -58,7 +58,6 @@ import {
   EVENT_APP_QUICK_PREVIEW,
   EVENT_APP_MIND_REFRESH,
   EVENT_APP_RESIZE,
-  MARKMIND_DEFAULT_DATA,
   EVENT_MIND_THEME_CHANGE,
   EVENT_MIND_DATA_CHANGE,
   EVENT_MIND_NODE_RENDER_END,
@@ -73,6 +72,7 @@ import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
 import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
 import Export from 'simple-mind-map/src/plugins/Export.js'
 import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
+import {fullOrginMindData, MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
 
 
 
@@ -126,7 +126,7 @@ export default {
   data() {
     return {
       mydata: {
-        mindMapData: MARKMIND_DEFAULT_DATA,
+        mindMapData: MARKMIND_DEFAULT_REAL_DATA,
         compId: 0.0,
         mindMode: 'edit',
         mindTheme: 'dark',
@@ -434,9 +434,8 @@ export default {
       this.app.workspace.off(EVENT_APP_MIND_EXPORT)
     },
     throttleSave: _.throttle(function (mindDataTempParam){
-        console.log("准备保存：throttle:"+JSON.stringify(mindDataTempParam))
-        //保存文件
-        this.app.vault.modify(this.mindFile, JSON.stringify(mindDataTempParam));
+        console.log("准备保存：throttle:")
+        this.app.vault.modify(this.mindFile, fullOrginMindData(mindDataTempParam));
         //触发刷新事件用于通知其他视图刷新
         this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
       }, SAVE_THROTTLE_TIME_MILLIS),

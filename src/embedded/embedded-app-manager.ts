@@ -10,6 +10,7 @@ import {
     getLinkHeight,
     hasLoadedEmbeddedLoom,
 } from "./embed-utils";
+import {getRealMindData, MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
 /**
  * Iterates through all open markdown leaves and then iterates through all embedded loom links
  * for each leaf and renders a loom for each one.
@@ -140,7 +141,7 @@ const processLinkEl = async (
 
     mindHeight += 'px';
 
-    //Get the loom state
+    //Get state
     const data = await app.vault.read(file);
     // debugger;
     // console.log(data)
@@ -149,7 +150,7 @@ const processLinkEl = async (
         leaf: leaf,
         mindContainerId: mindContainerId,
         mindFile: file,
-        initMindData: JSON.parse(data),
+        initMindData: getRealMindData(data),
         app: app,
         mode: 'embedded-edit',
         initElementHeight: mindHeight,

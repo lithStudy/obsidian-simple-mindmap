@@ -109,8 +109,8 @@ export default {
       if (!this.showMiniMap) {
         return
       }
-      this.throttleDrawMiniMap();
-      // this.drawMiniMap()
+      // this.throttleDrawMiniMap();
+      this.drawMiniMap()
     },
     init() {
       let {width, height} = this.$refs.navigatorBox.getBoundingClientRect()

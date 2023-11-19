@@ -8,12 +8,6 @@ export const DEFAULT_FILE_NAME = "Untitled";
  */
 export const FILE_EXTENSION = "mind";
 
-/**
- * 默认的导图文件内容
- */
-export const MARKMIND_DEFAULT_DATA = {"data": {"text": "根节点"}, "children": []}
-
-
 
 
 /**
