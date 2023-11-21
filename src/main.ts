@@ -138,7 +138,6 @@ export default class SamplePlugin extends Plugin {
     onunload() {
         console.log("main onunload")
         this.app.workspace.detachLeavesOfType(MUFENG_MARKMIND_VIEW);
-        this.app.workspace.close()
     }
 
 

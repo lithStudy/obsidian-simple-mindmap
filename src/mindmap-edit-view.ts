@@ -94,11 +94,11 @@ export class MufengMindMapView extends TextFileView {
                     contentEl:this.contentEl
                 })
                 console.log("createApp after")
-                const vm = this.mindApp.mount(newDiv);
-                this.markMind = vm.mindMap
-                // if(!this.markMind){
-                //   debugger;
-                // }
+                // const vm = this.mindApp.mount(newDiv);
+                // this.markMind = vm.mindMap
+
+                this.markMind= this.mindApp.mount(newDiv);
+
 
             }, 200);
 
@@ -140,7 +140,10 @@ export class MufengMindMapView extends TextFileView {
     }
 
     async onClose() {
-        console.log('onClose')
+        console.log('mindmap-edit-vue onClose')
+        this.mindApp.unmount();
+        // this.markMind=null;
+        this.markMind = null;
         this.contentEl.empty();
         //重要：这个监听不销毁，会导致每次打开新的思维导图产生的vue实例无法销毁
         this.app.workspace.off(EVENT_APP_MIND_REFRESH);
