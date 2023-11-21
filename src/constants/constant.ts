@@ -57,4 +57,4 @@ export const WIKI_LINK_REGEX = new RegExp(/\[\[([^|\]]+)(?:\|([\w-]+))?\]\]/g);
 
 
 export const SAVE_THROTTLE_TIME_MILLIS = 3000;
-export const MINIMAP_THROTTLE_TIME_MILLIS = 2000;
+export const MINIMAP_DEBOUNCE_TIME_MILLIS = 1000;

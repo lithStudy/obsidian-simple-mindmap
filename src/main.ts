@@ -24,9 +24,10 @@ import {
     EVENT_APP_MIND_NODE_PRIORITY,
     FILE_EXTENSION
 } from "./constants/constant";
-import {createMindMapFile} from "./utils/loom-file";
 import {getBasename} from "./utils/link-utils";
 import {getRealMindData} from "./utils/mind-content-util";
+import {FileSelectionModal} from "./utils/file-import";
+import {createMindMapFile} from "./utils/file-operations";
 
 
 export interface MindSettings {
@@ -137,6 +138,7 @@ export default class SamplePlugin extends Plugin {
     onunload() {
         console.log("main onunload")
         this.app.workspace.detachLeavesOfType(MUFENG_MARKMIND_VIEW);
+        this.app.workspace.close()
     }
 
 
@@ -176,7 +178,7 @@ export default class SamplePlugin extends Plugin {
             name: "Create mindMap and embed it into current file",
             // hotkeys: [{ modifiers: ["Mod", "Shift"], key: "+" }],
             editorCallback: async (editor) => {
-                const filePath = await this.newMindMapFile(null, true);
+                const filePath = await this.newMindMapFile(null, true,null,null);
                 if (!filePath) return;
 
                 const useMarkdownLinks = (this.app.vault as any).getConfig(
@@ -285,23 +287,23 @@ export default class SamplePlugin extends Plugin {
                 return false;
             },
         });
-        //导出-pdf
-        this.addCommand({
-            id: "export-pdf",
-            name: "export-pdf",
-            checkCallback: (checking: boolean) => {
-                const loomView =
-                    this.app.workspace.getActiveViewOfType(MufengMindMapView);
-                if (loomView) {
-                    if (!checking) {
-                        const activeFile=this.app.workspace.getActiveFile();
-                        this.exportData('pdf',activeFile.basename)
-                    }
-                    return true;
-                }
-                return false;
-            },
-        });
+        // //导出-pdf
+        // this.addCommand({
+        //     id: "export-pdf",
+        //     name: "export-pdf",
+        //     checkCallback: (checking: boolean) => {
+        //         const loomView =
+        //             this.app.workspace.getActiveViewOfType(MufengMindMapView);
+        //         if (loomView) {
+        //             if (!checking) {
+        //                 const activeFile=this.app.workspace.getActiveFile();
+        //                 this.exportData('pdf',activeFile.basename)
+        //             }
+        //             return true;
+        //         }
+        //         return false;
+        //     },
+        // });
         //导出-svg
         this.addCommand({
             id: "export-svg",
@@ -370,7 +372,7 @@ export default class SamplePlugin extends Plugin {
                 return false;
             },
         });
-         //导出-smm原始问家里
+         //导出-smm原始文件
          this.addCommand({
             id: "export-smm",
             name: "export-smm",
@@ -386,6 +388,19 @@ export default class SamplePlugin extends Plugin {
                 }
                 return false;
             },
+        });
+
+
+        //导入-smm原始文件
+        this.addCommand({
+            id: "import-smm",
+            name: "import-smm",
+            callback: () => {
+                const modal = new FileSelectionModal(this.app);
+                modal.setHandler(this, this.newMindMapFile);
+                modal.setDefaults(this.settings);
+                modal.open();
+            }
         });
 
     }
@@ -416,14 +431,17 @@ export default class SamplePlugin extends Plugin {
 
     private async newMindMapFile(
         contextMenuFolderPath: string | null,
-        embedded?: boolean
+        embedded?: boolean,
+        initData?:string,
+        fileName?:string,
     ) {
         const folderPath = this.getFolderForNewMindFile(contextMenuFolderPath);
         const filePath = await createMindMapFile(
             this.app,
             folderPath,
             this.manifest.version,
-            this.settings.defaultInitData
+            initData?initData:this.settings.defaultInitData,
+            fileName
         );
 
         //If the file is embedded, we don't need to open it
@@ -487,12 +505,7 @@ export default class SamplePlugin extends Plugin {
             this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
               exportType,
               true,
-              fileName,
-              `* {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-              }`
+              fileName
             )
           } else if (exportType==='smm') {
             this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
@@ -506,7 +519,7 @@ export default class SamplePlugin extends Plugin {
               exportType,
               true,
               fileName,
-              false
+              true
             )
           }else if (exportType === 'png') {
             this.app.workspace.trigger(EVENT_APP_MIND_EXPORT,
@@ -515,11 +528,13 @@ export default class SamplePlugin extends Plugin {
               fileName,
               true
             )
-          } else if (exportType === 'pdf') {
-            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT, exportType, true, fileName, false)
-          } else {
-            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT, exportType, true, fileName)
           }
+        // else if (exportType === 'pdf') {
+        //     this.app.workspace.trigger(EVENT_APP_MIND_EXPORT, exportType, true, fileName, false)
+        // }
+        else {
+            this.app.workspace.trigger(EVENT_APP_MIND_EXPORT, exportType, true, fileName)
+        }
     }
 
     // async loadSettings() {
@@ -545,5 +560,6 @@ export default class SamplePlugin extends Plugin {
         await this.saveData(this.settings);
         // store.dispatch(setSettings({ ...this.settings }));
     }
+
 
 }

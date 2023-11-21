@@ -27,7 +27,7 @@ import _ from "lodash";
 import {
   EVENT_APP_CSS_CHANGE,
   EVENT_APP_MIND_REFRESH,
-  EVENT_MIND_DATA_CHANGE, EVENT_MIND_NODE_RENDER_END, EVENT_MIND_VIEW_DATA_CHANGE, MINIMAP_THROTTLE_TIME_MILLIS,
+  EVENT_MIND_DATA_CHANGE, EVENT_MIND_NODE_RENDER_END, EVENT_MIND_VIEW_DATA_CHANGE, MINIMAP_DEBOUNCE_TIME_MILLIS,
   SAVE_THROTTLE_TIME_MILLIS
 } from "../constants/constant";
 
@@ -140,9 +140,15 @@ export default {
       // this.init();
       // this.setPosition();
     },
-    throttleDrawMiniMap: _.throttle(function (){
-      this.drawMiniMap();
-    }, MINIMAP_THROTTLE_TIME_MILLIS),
+    throttleDrawMiniMap: _.debounce(function (){
+      //这里由于有一定的延迟性，用户操作太快，有可能出现小地图还没来记得渲染主页面就被关闭的情况，这种情况会导致延迟执行的小地图渲染报错，此处直接catch
+      try {
+        this.drawMiniMap();
+      } catch (error) {
+        console.log(error)
+      }
+
+    }, MINIMAP_DEBOUNCE_TIME_MILLIS),
 
     onMousedown(e) {
 

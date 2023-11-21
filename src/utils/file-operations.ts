@@ -1,5 +1,40 @@
 import { App, TFolder } from "obsidian";
 import { splitFileExtension } from "./utils";
+import {DEFAULT_FILE_NAME, FILE_EXTENSION} from "../constants/constant";
+
+export const createMindMapFile = async (
+	app: App,
+	folderPath: string,
+	pluginVersion: string,
+	defaultInitData:string,
+	fileName:string
+) => {
+	try {
+		await createFolderIfNotExists(app, folderPath);
+		const filePath = getFilePath(folderPath,fileName);
+		return await createFile(app, filePath, defaultInitData);
+	} catch (err) {
+		new Notice("Could not create mindMap file");
+		throw err;
+	}
+};
+
+const getFileName = (fileName:string): string => {
+	if(!fileName){
+		fileName = DEFAULT_FILE_NAME
+	}
+	return `${fileName}.${FILE_EXTENSION}`;
+};
+
+const getFilePath = (folderPath: string) => {
+	const fileName = getFileName();
+	return normalizePath(folderPath + "/" + fileName);
+};
+
+const createFolderIfNotExists = async (app: App, folderPath: string) => {
+	if (app.vault.getAbstractFileByPath(folderPath) == null)
+		await createFolder(app, folderPath);
+};
 
 export const createFolder = async (
 	app: App,
