@@ -1,4 +1,5 @@
 import { App, Modal, Notice,  Setting, TFile } from 'obsidian';
+import {removeFileExtension} from "./file-operations";
 interface JsonImportSettings {
     jsonName: string;
     jsonNamePath: boolean;
@@ -61,9 +62,8 @@ export class FileSelectionModal extends Modal {
             {
                 console.log(`Processing input file ${datafiles[i].name}`);
                 let srctext = await datafiles[i].text();
-                // debugger;
                 // this.handler(null,false,srctext);
-                await this.handler.call(this.caller, null,false,srctext,datafiles[i].name);
+                await this.handler.call(this.caller, null,false,srctext,removeFileExtension(datafiles[i].name));
 
                 // let is_json:boolean = datafiles[i].name.endsWith(".json");
                 // let objdataarray:Array<any> = is_json ? parsejson(srctext) : [ convertCsv(srctext) ];

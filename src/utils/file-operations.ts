@@ -26,9 +26,9 @@ const getFileName = (fileName:string): string => {
 	return `${fileName}.${FILE_EXTENSION}`;
 };
 
-const getFilePath = (folderPath: string) => {
-	const fileName = getFileName();
-	return normalizePath(folderPath + "/" + fileName);
+const getFilePath = (folderPath: string,fileName:string) => {
+	const fileNameTemp = getFileName(fileName);
+	return normalizePath(folderPath + "/" + fileNameTemp);
 };
 
 const createFolderIfNotExists = async (app: App, folderPath: string) => {
@@ -70,3 +70,11 @@ export const createFile = async (
 		}
 	}
 };
+
+export const removeFileExtension =(fileName: string)=>{
+	const lastDotIndex = fileName.lastIndexOf('.');
+	if (lastDotIndex === -1) {
+		return fileName; // 如果文件名中没有点号，则不包含后缀，直接返回原始文件名
+	}
+	return fileName.substring(0, lastDotIndex);
+}
