@@ -42,7 +42,7 @@ export class FileSelectionModal extends Modal {
     }
 
     onOpen() {
-        const setting1 = new Setting(this.contentEl).setName("Choose json/smm File").setDesc("Choose json/smm data file to import, or paste text into the text box");
+        const setting1 = new Setting(this.contentEl).setName("Choose json/smm File").setDesc("Choose json/smm data file to import");
         const inputDataFile = setting1.controlEl.createEl("input", {
             attr: {
                 type: "file",
@@ -50,30 +50,8 @@ export class FileSelectionModal extends Modal {
                 accept: ".json,.smm"
             }
         });
-        const setting1a = new Setting(this.contentEl).setName("file name");
-        const inputJsonUrl = setting1a.controlEl.createEl("input", {
-            attr: {
-                type: "string"
-            }
-        });
-        inputJsonUrl.value ="test";
-
-        const setting1d = new Setting(this.contentEl).setName("Data contains multiple JSON objects").setDesc("Select this option if the JSON data might contain more than one object (the selected data is split into separate objects by looking for '}\s+{' as the separator");
-        const inputMultipleJSON = setting1d.controlEl.createEl("input", {
-            attr: {
-                type: "checkbox"
-            }
-        });
-        inputMultipleJSON.checked = this.default_settings.multipleJSON;
-
-
-
-        const setting5 = new Setting(this.contentEl).setName("Import").setDesc("Press to start the Import Process");
-        const input5 = setting5.controlEl.createEl("button");
-        input5.textContent = "IMPORT";
-
-        input5.onclick = async () => {
-
+        inputDataFile.onchange=async ()=>{
+            console.log("inputDataFile.change")
             const { files:datafiles } = inputDataFile;
             if (!datafiles.length) {
                 new Notice("No JSON file selected");
@@ -96,6 +74,35 @@ export class FileSelectionModal extends Modal {
             new Notice("Import Finished");
             this.close();
         }
+
+        // const setting1a = new Setting(this.contentEl).setName("file name");
+        // const inputJsonUrl = setting1a.controlEl.createEl("input", {
+        //     attr: {
+        //         type: "string"
+        //     }
+        // });
+        // inputJsonUrl.value ="test";
+        //
+        // const setting1d = new Setting(this.contentEl).setName("Data contains multiple JSON objects").setDesc("Select this option if the JSON data might contain more than one object (the selected data is split into separate objects by looking for '}\s+{' as the separator");
+        // const inputMultipleJSON = setting1d.controlEl.createEl("input", {
+        //     attr: {
+        //         type: "checkbox"
+        //     }
+        // });
+        // inputMultipleJSON.checked = this.default_settings.multipleJSON;
+        //
+        //
+        //
+        // const setting5 = new Setting(this.contentEl).setName("Import").setDesc("Press to start the Import Process");
+        // const input5 = setting5.controlEl.createEl("button");
+        // input5.textContent = "IMPORT";
+
+
+
+        // input5.onclick = async () => {
+        //
+        //
+        // }
     }
 
     onClose() {

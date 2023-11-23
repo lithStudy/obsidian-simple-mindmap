@@ -1,4 +1,4 @@
-import { App, TFolder } from "obsidian";
+import { App, TFolder ,normalizePath} from "obsidian";
 import { splitFileExtension } from "./utils";
 import {DEFAULT_FILE_NAME, FILE_EXTENSION} from "../constants/constant";
 
