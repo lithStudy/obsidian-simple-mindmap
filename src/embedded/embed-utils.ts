@@ -1,6 +1,6 @@
 import { App, MarkdownView } from "obsidian";
 import { FILE_EXTENSION } from "../constants/constant";
-import { numToPx } from "./conversion";
+import {numToPx} from "../utils/utils";
 
 export const getEmbeddedLoomLinkEls = (
 	view: MarkdownView,
@@ -27,7 +27,7 @@ export const getEmbeddedLoomLinkEls = (
 	return linkEls;
 };
 
-export const hasLoadedEmbeddedLoom = (linkEl: HTMLElement) => {
+export const hasLoadedEmbeddedMind = (linkEl: HTMLElement) => {
 	if (linkEl.children.length > 0) {
 		const firstChildEl = linkEl.children[0];
 		if (firstChildEl.classList.contains("mufeng-mind-embedded-container"))
@@ -36,7 +36,7 @@ export const hasLoadedEmbeddedLoom = (linkEl: HTMLElement) => {
 	return false;
 };
 
-export const findEmbeddedLoomFile = (
+export const findEmbeddedMindFile = (
 	app: App,
 	linkEl: HTMLElement,
 	sourcePath: string

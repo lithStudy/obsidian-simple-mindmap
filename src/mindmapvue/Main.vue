@@ -306,10 +306,6 @@ export default {
     }
 
   },
-  beforeUnmount(){
-    console.log("Main.vue beforeUnmount")
-
-  },
   unmounted(){
     console.log("Main.vue unmounted")
     //由于mindmap中有个匿名的window监听事件在监听快捷键可能导致快捷键操作被拦截，我没法销毁这个监听，只能将快捷键暂停

@@ -15,7 +15,7 @@ import {
 import {SampleSettingTab} from "./setting-tab";
 import {MufengMindMapView, MUFENG_MARKMIND_VIEW} from "./mindmap-edit-view"
 import PreviewPlugin from "./mindmap-embedded-view";
-import {getEmbeddedLoomLinkEls, findEmbeddedLoomFile} from "./embedded/embed-utils"
+import {getEmbeddedLoomLinkEls, findEmbeddedMindFile} from "./embedded/embed-utils"
 import {createApp, App as VueApp} from "vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
 import {
