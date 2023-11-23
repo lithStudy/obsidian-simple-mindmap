@@ -41,7 +41,6 @@ export default function PreviewPlugin(
                     (leaf) => leaf.view.editor.cm === update.view
                 );
                 if (!activeLeaf) return;
-                console.log('EditingViewPlugin start')
                 this.loadEmbeddedMindApps(
                     manifestPluginVersion,
                     activeLeaf,
