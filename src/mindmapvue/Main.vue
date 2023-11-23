@@ -43,7 +43,7 @@ import {
 import MindMap from "simple-mind-map";
 import Drag from "simple-mind-map/src/plugins/Drag.js"
 import KeyboardNavigation from 'simple-mind-map/src/plugins/KeyboardNavigation.js'
-import RichText from 'simple-mind-map/src/plugins/RichText.js'
+// import RichText from 'simple-mind-map/src/plugins/RichText.js'
 import MiniMap from 'simple-mind-map/src/plugins/MiniMap.js'
 import {WorkspaceLeaf} from "obsidian";
 import {
@@ -68,8 +68,8 @@ import Navigator from 'Navigator.vue'
 import MindTools from 'Tools.vue'
 import NodeNote from 'NodeEdit.vue'
 import NodeNoteContentShow from 'NodeNoteContentShow.vue'
-import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
-import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
+// import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
+// import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
 import Export from 'simple-mind-map/src/plugins/Export.js'
 import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
 import {fullOrginMindData, MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
