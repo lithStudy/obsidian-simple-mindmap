@@ -72,7 +72,7 @@ import NodeNoteContentShow from 'NodeNoteContentShow.vue'
 // import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
 import Export from 'simple-mind-map/src/plugins/Export.js'
 import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
-import {fullOrginMindData, MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
+import { MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
 
 
 
@@ -443,9 +443,9 @@ export default {
     },
     throttleSave: _.throttle(function (mindDataTempParam){
         console.log("准备保存：throttle:")
-        this.app.vault.modify(this.mindFile, fullOrginMindData(mindDataTempParam));
+        this.app.vault.modify(this.mindFile, JSON.stringify(mindDataTempParam));
         //触发刷新事件用于通知其他视图刷新
-        this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
+        this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, JSON.stringify(mindDataTempParam), this.mindFile.path);
       }, SAVE_THROTTLE_TIME_MILLIS),
 
   }

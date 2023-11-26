@@ -15,7 +15,6 @@ import {
 } from "./constants/constant";
 import {findEmbeddedMindFile, getEmbeddedLoomLinkEls, hasLoadedEmbeddedMind} from "./embedded/embed-utils";
 import SimpleMindMap from "./mindmapvue/Main.vue";
-import {getRealMindData} from "./utils/mind-content-util";
 
 export default function PreviewPlugin(
     app: App,
@@ -185,7 +184,7 @@ export default function PreviewPlugin(
                     leaf: leaf,
                     mindContainerId: mindContainerId,
                     mindFile: file,
-                    initMindData: getRealMindData(data),
+                    initMindData: data,
                     app: app,
                     mode: 'embedded-edit',
                     initElementHeight: mindHeight,

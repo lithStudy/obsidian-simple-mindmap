@@ -6,8 +6,6 @@
 import {
     Plugin,
     WorkspaceLeaf,
-    TFile,
-    TFolder,
     ViewState,
     MarkdownView,
     normalizePath,
@@ -15,8 +13,7 @@ import {
 import {SampleSettingTab} from "./setting-tab";
 import {MufengMindMapView, MUFENG_MARKMIND_VIEW} from "./mindmap-edit-view"
 import PreviewPlugin from "./mindmap-embedded-view";
-import {getEmbeddedLoomLinkEls, findEmbeddedMindFile} from "./embedded/embed-utils"
-import {createApp, App as VueApp} from "vue";
+import {createApp} from "vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
 import {
     EVENT_APP_MIND_EXPORT,
@@ -25,7 +22,7 @@ import {
     FILE_EXTENSION
 } from "./constants/constant";
 import {getBasename} from "./utils/link-utils";
-import {getRealMindData} from "./utils/mind-content-util";
+import {MARKMIND_DEFAULT_REAL_DATA} from "./utils/mind-content-util";
 import {FileSelectionModal} from "./utils/file-import";
 import {createMindMapFile} from "./utils/file-operations";
 
@@ -36,7 +33,7 @@ export interface MindSettings {
     removeMarkdownOnExport: boolean;
     defaultEmbedWidth: string;
     defaultEmbedHeight: string;
-    defaultInitData:string;
+    defaultInitData: { };
 }
 
 export const DEFAULT_SETTINGS: MindSettings = {
@@ -45,7 +42,7 @@ export const DEFAULT_SETTINGS: MindSettings = {
     removeMarkdownOnExport: true,
     defaultEmbedWidth: "100%",
     defaultEmbedHeight: "340px",
-    defaultInitData:'{"data": {"text": "根节点"}, "children": []}',
+    defaultInitData:MARKMIND_DEFAULT_REAL_DATA,
 };
 
 /**
@@ -476,7 +473,7 @@ export default class SamplePlugin extends Plugin {
             const data =await this.app.vault.read(file);
             createApp(SimpleMindMap, {
                     mindFile:file,
-                    initMindData: getRealMindData(data),
+                    initMindData: data,
                     app: this.app,
                     mode: 'preview',
                     contentEl:linkEl,

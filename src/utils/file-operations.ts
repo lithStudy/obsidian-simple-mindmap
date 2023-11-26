@@ -12,6 +12,7 @@ export const createMindMapFile = async (
 	try {
 		await createFolderIfNotExists(app, folderPath);
 		const filePath = getFilePath(folderPath,fileName);
+		debugger;
 		return await createFile(app, filePath, defaultInitData);
 	} catch (err) {
 		new Notice("Could not create mindMap file");

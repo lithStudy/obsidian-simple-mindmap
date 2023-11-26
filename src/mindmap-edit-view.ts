@@ -13,7 +13,7 @@ import {
     EVENT_APP_MIND_REFRESH,
     EVENT_APP_RESIZE
 } from "./constants/constant";
-import {fullOrginMindData, getRealMindData, MARKMIND_DEFAULT_REAL_DATA} from "./utils/mind-content-util";
+import { MARKMIND_DEFAULT_REAL_DATA} from "./utils/mind-content-util";
 
 export const MUFENG_MARKMIND_VIEW = "mufeng-mindmap";
 
@@ -107,13 +107,14 @@ export class MufengMindMapView extends TextFileView {
 
     //obsidian保存数据
     getViewData() {
-        return fullOrginMindData(this.markMindData);
+        return JSON.stringify(this.markMindData);
+        // return fullOrginMindData(this.markMindData);
     }
 
     //从文件中获取数据并使用
     setViewData(data: string, clear: boolean) {
         // console.log('setViewData')
-        this.markMindData = getRealMindData(data);
+        this.markMindData = JSON.parse(data);
         //clear为true，说明正在打开另一个文件
         if (clear) {
             if (this.mindApp) {

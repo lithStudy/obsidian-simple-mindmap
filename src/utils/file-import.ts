@@ -62,6 +62,10 @@ export class FileSelectionModal extends Modal {
             {
                 console.log(`Processing input file ${datafiles[i].name}`);
                 let srctext = await datafiles[i].text();
+                let mindDataJson = JSON.parse(srctext);
+                if(mindDataJson.root){
+                    srctext = JSON.stringify(mindDataJson.root)
+                }
                 // this.handler(null,false,srctext);
                 await this.handler.call(this.caller, null,false,srctext,removeFileExtension(datafiles[i].name));
 
