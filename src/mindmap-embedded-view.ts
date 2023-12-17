@@ -174,7 +174,6 @@ export default function PreviewPlugin(
                 }
 
                 mindHeight += 'px';
-                debugger;
                 //Get state
                 const data = await app.vault.read(file);
                 // debugger;
