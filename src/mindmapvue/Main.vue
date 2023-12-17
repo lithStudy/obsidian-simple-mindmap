@@ -415,7 +415,7 @@ export default {
         } else {
           console.log("触发刷新，当前视图id：" + this.mydata.compId)
           //这里不能直接用setData方法，会导致循环依赖保存
-          // mindMap.setData(newMindData)
+          // this.mindMap.setData(newMindData)
 
           this.mindMap.execCommand('CLEAR_ACTIVE_NODE')
           this.mindMap.command.clearHistory()
@@ -444,7 +444,7 @@ export default {
         console.log("准备保存：throttle:")
         this.app.vault.modify(this.mindFile, JSON.stringify(mindDataTempParam));
         //触发刷新事件用于通知其他视图刷新
-        this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, JSON.stringify(mindDataTempParam), this.mindFile.path);
+        this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
       }, SAVE_THROTTLE_TIME_MILLIS),
 
   }
