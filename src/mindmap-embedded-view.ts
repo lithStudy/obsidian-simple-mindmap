@@ -174,7 +174,7 @@ export default function PreviewPlugin(
                 }
 
                 mindHeight += 'px';
-
+                debugger;
                 //Get state
                 const data = await app.vault.read(file);
                 // debugger;
@@ -184,7 +184,7 @@ export default function PreviewPlugin(
                     leaf: leaf,
                     mindContainerId: mindContainerId,
                     mindFile: file,
-                    initMindData: data,
+                    initMindData: JSON.parse(data),
                     app: app,
                     mode: 'embedded-edit',
                     initElementHeight: mindHeight,

@@ -473,7 +473,7 @@ export default class SamplePlugin extends Plugin {
             const data =await this.app.vault.read(file);
             createApp(SimpleMindMap, {
                     mindFile:file,
-                    initMindData: data,
+                    initMindData: JSON.parse(data),
                     app: this.app,
                     mode: 'preview',
                     contentEl:linkEl,

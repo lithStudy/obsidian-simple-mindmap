@@ -158,7 +158,7 @@ export default {
     console.log(this.noteMode)
 
     this.mydata.compId = Math.random();
-
+    debugger
     this.mydata.mindMapData = {...this.mydata.mindMapData, ...this.initMindData};
     this.mydata.mindMode = this.mode || 'edit'
 
