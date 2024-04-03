@@ -1,5 +1,5 @@
-import {TextFileView} from "obsidian";
-import {createApp, App as VueApp} from "vue";
+import {TextFileView, WorkspaceLeaf} from "obsidian";
+import {App, createApp, App as VueApp} from "vue";
 // import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
 import MindMap from "simple-mind-map";
@@ -29,7 +29,7 @@ export class MufengMindMapView extends TextFileView {
 
     private mindApp: {};
 
-    private leaf: WorkspaceLeaf;
+    // private leaf: WorkspaceLeaf;
 
 
     constructor(leaf: WorkspaceLeaf, pluginId: string, pluginVersion: string) {
@@ -97,7 +97,7 @@ export class MufengMindMapView extends TextFileView {
                 // const vm = this.mindApp.mount(newDiv);
                 // this.markMind = vm.mindMap
 
-                this.markMind= this.mindApp.mount(newDiv);
+                this.markMind= ((this.mindApp as VueApp).mount(newDiv)) as any;
 
 
             }, 200);
@@ -118,8 +118,8 @@ export class MufengMindMapView extends TextFileView {
         //clear为true，说明正在打开另一个文件
         if (clear) {
             if (this.mindApp) {
-                console.log("卸载myapp")
-                this.mindApp.unmount();
+                console.log("卸载myapp");
+                (this.mindApp as VueApp).unmount();
                 this.markMind=null;
                 this.onClose();
             }
@@ -141,22 +141,22 @@ export class MufengMindMapView extends TextFileView {
     }
 
     async onClose() {
-        console.log('mindmap-edit-vue onClose')
-        this.mindApp.unmount();
+        console.log('mindmap-edit-vue onClose');
+        (this.mindApp as VueApp).unmount();
         // this.markMind=null;
         this.markMind = null;
         this.contentEl.empty();
         //重要：这个监听不销毁，会导致每次打开新的思维导图产生的vue实例无法销毁
-        this.app.workspace.off(EVENT_APP_MIND_REFRESH);
-        this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE);
-        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
-        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
-        this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY)
-        this.app.workspace.off(EVENT_APP_MIND_EXPORT)
-        this.app.workspace.off(EVENT_APP_RESIZE);
-        this.app.workspace.off(EVENT_APP_CSS_CHANGE);
-        this.app.workspace.off(EVENT_APP_QUICK_PREVIEW)
-        this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE)
+        this.app.workspace.off(EVENT_APP_MIND_REFRESH,()=>{});
+        this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE,()=>{});
+        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE,()=>{})
+        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE,()=>{})
+        this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY,()=>{})
+        this.app.workspace.off(EVENT_APP_MIND_EXPORT,()=>{})
+        this.app.workspace.off(EVENT_APP_RESIZE,()=>{});
+        this.app.workspace.off(EVENT_APP_CSS_CHANGE,()=>{});
+        this.app.workspace.off(EVENT_APP_QUICK_PREVIEW,()=>{})
+        this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE,()=>{})
     }
 
 

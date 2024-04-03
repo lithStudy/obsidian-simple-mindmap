@@ -1,8 +1,8 @@
 import {PluginValue, ViewPlugin, ViewUpdate} from "@codemirror/view";
 
 // import {loadEmbeddedMindApps} from "./embedded/embedded-app-manager";
-import {App} from "obsidian";
-import {createApp} from "vue";
+import {App, WorkspaceLeaf, MarkdownView} from "obsidian";
+import {createApp, App as VueApp} from "vue";
 import {
     EVENT_APP_CSS_CHANGE,
     EVENT_APP_MIND_EMBEDDED_RESIZE,
@@ -51,24 +51,24 @@ export default function PreviewPlugin(
                 console.log("embedded destory")
                 if (this.mindAppList.length > 0) {
                     for (const item of this.mindAppList) {
-                        console.log("embedded destory unmount")
-                        item.unmount();
+                        console.log("embedded destory unmount");
+                        (item as VueApp).unmount();
                     }
                 }
 
-                app.workspace.off(EVENT_APP_RESIZE);
-                app.workspace.off(EVENT_APP_CSS_CHANGE)
-                app.workspace.off(EVENT_APP_QUICK_PREVIEW)
-                app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE)
+                app.workspace.off(EVENT_APP_RESIZE,()=>{});
+                app.workspace.off(EVENT_APP_CSS_CHANGE,()=>{})
+                app.workspace.off(EVENT_APP_QUICK_PREVIEW,()=>{})
+                app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE,()=>{})
 
-                app.workspace.off(EVENT_APP_MIND_REFRESH);
-                app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE);
-                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW)
-                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
-                app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY)
-                app.workspace.off(EVENT_APP_MIND_EXPORT)
+                app.workspace.off(EVENT_APP_MIND_REFRESH,()=>{});
+                app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE,()=>{});
+                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW,()=>{})
+                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE,()=>{})
+                app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY,()=>{})
+                app.workspace.off(EVENT_APP_MIND_EXPORT,()=>{})
 
-                app.workspace.off(EVENT_MIND_NODE_ACTIVE)
+                app.workspace.off(EVENT_MIND_NODE_ACTIVE,()=>{})
             }
 
 
@@ -192,7 +192,7 @@ export default function PreviewPlugin(
                     contentEl: containerEl
                 })
                 mindApp.mount(containerEl);
-                this.mindAppList.push(mindApp);
+                this.mindAppList.push(mindApp as never);
             }
 
 
