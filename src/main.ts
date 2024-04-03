@@ -394,7 +394,7 @@ export default class SamplePlugin extends Plugin {
             callback: () => {
                 const modal = new FileSelectionModal(this.app);
                 modal.setHandler(this, this.newMindMapFile);
-                modal.setDefaults(this.settings);
+                modal.setDefaults(this.settings as any);
                 modal.open();
             }
         });
@@ -436,7 +436,7 @@ export default class SamplePlugin extends Plugin {
             this.app,
             folderPath,
             this.manifest.version,
-            initData?initData:this.settings.defaultInitData,
+            initData?initData:(this.settings.defaultInitData) as any,
             fileName
         );
 
