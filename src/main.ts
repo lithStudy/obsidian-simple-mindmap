@@ -436,7 +436,7 @@ export default class SamplePlugin extends Plugin {
             this.app,
             folderPath,
             this.manifest.version,
-            initData?initData:this.settings.defaultInitData,
+            initData?initData:JSON.stringify(this.settings.defaultInitData),
             fileName
         );
 

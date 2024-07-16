@@ -217,7 +217,7 @@ export default {
       if (this.mindMap.renderer.activeNodeList.length <= 0) {
         return
       }
-      textEdit.show(this.mindMap.renderer.activeNodeList[0])
+      textEdit.show({node:this.mindMap.renderer.activeNodeList[0]})
     })
 
     this.mindMap.on(EVENT_MIND_NODE_RENDER_END, (...args) => {

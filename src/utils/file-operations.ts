@@ -57,7 +57,6 @@ export const createFile = async (
 		const numIterations = numExisting > 0 ? " " + numExisting : "";
 		const filePathWithIteration =
 			filePathExtension[0] + numIterations + filePathExtension[1];
-
 		await app.vault.create(filePathWithIteration, data);
 		return filePathWithIteration;
 	} catch (err: unknown) {
