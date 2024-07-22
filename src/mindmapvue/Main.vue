@@ -45,7 +45,7 @@ import Drag from "simple-mind-map/src/plugins/Drag.js"
 import KeyboardNavigation from 'simple-mind-map/src/plugins/KeyboardNavigation.js'
 // import RichText from 'simple-mind-map/src/plugins/RichText.js'
 import MiniMap from 'simple-mind-map/src/plugins/MiniMap.js'
-import {WorkspaceLeaf} from "obsidian";
+import {MarkdownView, WorkspaceLeaf} from "obsidian";
 import {
   EVENT_APP_CSS_CHANGE,
   EVENT_APP_MIND_EMBEDDED_RESIZE,
@@ -97,7 +97,7 @@ export default {
     app: {
       required: false
     },
-    //embedded-edit、edit、preview
+    //embedded、edit、preview
     mode: {
       required: false
     },
@@ -197,7 +197,7 @@ export default {
       theme: this.mydata.mindTheme,
       //允许拖拽
       enableFreeDrag: true,
-      readonly: this.mydata.mindMode === 'preview' ? true : false,
+      readonly: this.mydata.mindMode === 'preview'||this.mydata.mindMode === 'embedded' ? true : false,
       // initRootNodePosition: ['center', 'center'],
       mousewheelAction: 'zoom',// zoom（放大缩小）、move（上下移动）
       mousewheelZoomActionReverse:true,
@@ -227,6 +227,7 @@ export default {
         // debugger
         console.log("定位根节点")
         this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
+        this.mindMap.view.fit()
       }
       this.firstRender = false;
     })
@@ -246,6 +247,11 @@ export default {
         return
       }
       this.noteContext = node.getData('note');
+      //移除外部焦点
+      const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+      if (view) {
+        view.editor.blur();
+      }
     })
 
     //监听刷新事件，刷新视图
@@ -255,6 +261,7 @@ export default {
     );
 
     this.app.workspace.on(EVENT_APP_RESIZE, () => {
+      console.log("EVENT_APP_RESIZE")
       // debugger;
       this.mindResize();
     })
@@ -262,8 +269,9 @@ export default {
     //嵌入模式动态修改容器尺寸事件
     this.app.workspace.on(EVENT_APP_MIND_EMBEDDED_RESIZE, (leaf: WorkspaceLeaf)=>{
       //是当前页面，且是嵌入模式
-      if (this.leaf.id === leaf.id && this.mode==='embedded-edit') {
+      if (this.leaf.id === leaf.id && this.mode==='embedded') {
         this.mindResize();
+
       }
     })
     //跟随obsidian样式
@@ -279,6 +287,7 @@ export default {
     //监控obsidian窗口调整mind大小
     this.app.workspace.on(EVENT_APP_LEAF_CHANGE_ACTIVE, (leaf: WorkspaceLeaf) => {
       if (!leaf) return;
+      console.log("EVENT_APP_LEAF_CHANGE_ACTIVE:"+leaf.id+" this:"+this.leaf.id)
       if (this.leaf.id === leaf.id) {
         this.mindResize();
       }
@@ -368,7 +377,7 @@ export default {
      */
     mindResizeAndCenter(){
       this.mindMap.resize();
-      this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
+      // this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
     },
     mindResize(){
       console.log('resize:' + this.mydata.compId)
@@ -406,6 +415,7 @@ export default {
     },
     handleRefreshEvent(newCompId, newMindData, newFilePath){
       console.log("监听到思维导图刷新事件，当前思维导图为：" + this.mydata.compId+"，通知刷新的思维导图为："+newCompId)
+      return;
       //如果组件id不一样且文件是同一个，重新渲染，以保证相同文件在其他视图的数据也被修改了
       if (this.mydata.compId !== newCompId && newFilePath === this.mindFile.path) {
         console.log('监听到其他视图的刷新事件：当前视图id：' + this.mydata.compId + ",其他视图：" + newCompId)

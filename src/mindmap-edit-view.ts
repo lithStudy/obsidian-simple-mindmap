@@ -90,6 +90,7 @@ export class MufengMindMapView extends TextFileView {
                     initElementHeight: heightWithoutPadding +"px",
                     showMiniMap: true,
                     showMindTools:true,
+                    enableAutoEnterTextEditWhenKeydown:true,
                     // contentEl: this.containerEl,
                     contentEl:this.contentEl
                 })

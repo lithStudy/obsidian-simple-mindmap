@@ -5,6 +5,7 @@
 // } from "src/shared/link/link-utils";
 import {EXTENSION_REGEX, WIKI_LINK_REGEX} from "../constants/constant";
 import {getWikiLinkText, stripDirectory, stripFileExtension} from "./link-utils";
+import {TFile} from "obsidian";
 
 export const splitFileExtension = (
 	filePath: string
@@ -55,5 +56,48 @@ export const pxToNum = (value: string) => {
 
 export const numToPx = (value: number | string) => {
 	return `${value}px`;
+};
+
+
+export const openFile = (props: { file: TFile; app: App; newLeaf: boolean; leafBySplit?: boolean }) => {
+	// debugger
+	const { file, app, newLeaf, leafBySplit } = props;
+	// let leaf = app.workspace.getLeaf(newLeaf);
+	// if (leafBySplit) leaf = app.workspace.createLeafBySplit(leaf, 'vertical');
+	// app.workspace.setActiveLeaf(leaf, false);
+	// leaf.openFile(file, { eState: { focus: true } });
+
+	let myLeaf = app.workspace.getLeaf(newLeaf);
+	//新创建分屏打开
+	if (leafBySplit) {
+		myLeaf = app.workspace.createLeafBySplit(myLeaf, 'vertical');
+		app.workspace.setActiveLeaf(myLeaf, false);
+	}
+
+
+	let result = false;
+	app.workspace.iterateAllLeaves((leaf) => {
+		const viewState = leaf.getViewState();
+		if (viewState.state?.file === file.path) {
+			app.workspace.setActiveLeaf(leaf);
+			result = true;
+		}
+	});
+
+	// If we have a "New Tab" tab open, just switch to that and let
+	// 优先以空tab打开文件
+	const emptyLeaves = app.workspace.getLeavesOfType("empty");
+	if (emptyLeaves.length > 0) {
+		app.workspace.setActiveLeaf(emptyLeaves[0]);
+		emptyLeaves[0].openFile(file, { eState: { focus: true } });
+		return;
+	}
+
+	if (!result) {
+		//event.stopPropagation(); // This might break something...
+		app.workspace.openLinkText(file.path, file.path, true);
+		return;
+	}
+
 };
 

@@ -74,7 +74,9 @@ export default {
     resize(){
       // console.log("定位根节点")
       this.mindMap.resize();
-      this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
+      this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root,false)
+      //缩放思维导图至适应画布
+      this.mindMap.view.fit()
     },
     remark(){
       console.log("点击备注按钮")

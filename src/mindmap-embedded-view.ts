@@ -1,7 +1,7 @@
 import {PluginValue, ViewPlugin, ViewUpdate} from "@codemirror/view";
 
 // import {loadEmbeddedMindApps} from "./embedded/embedded-app-manager";
-import {App} from "obsidian";
+import {App, MarkdownView} from "obsidian";
 import {createApp} from "vue";
 import {
     EVENT_APP_CSS_CHANGE,
@@ -15,6 +15,8 @@ import {
 } from "./constants/constant";
 import {findEmbeddedMindFile, getEmbeddedLoomLinkEls, hasLoadedEmbeddedMind} from "./embedded/embed-utils";
 import SimpleMindMap from "./mindmapvue/Main.vue";
+import {MUFENG_MARKMIND_VIEW} from "./mindmap-edit-view";
+import {openFile} from "./utils/utils";
 
 export default function PreviewPlugin(
     app: App,
@@ -165,7 +167,7 @@ export default function PreviewPlugin(
                 this.resetLinkStyles(linkEl);
 
                 //Create a container
-                const containerEl = this.renderContainerEl(linkEl);
+                const containerEl = this.renderContainerEl(linkEl,app,leaf);
 
                 let mindHeight = linkEl.getAttribute("height");
                 // debugger;
@@ -185,7 +187,7 @@ export default function PreviewPlugin(
                     mindFile: file,
                     initMindData: JSON.parse(data),
                     app: app,
-                    mode: 'embedded-edit',
+                    mode: 'embedded',
                     initElementHeight: mindHeight,
                     showMiniMap: false,
                     showMindTools: true,
@@ -201,7 +203,7 @@ export default function PreviewPlugin(
              * This container has padding so that text doesn't touch the edges of the embed
              * @param linkEl - The link element that contains the embedded loom
              */
-            renderContainerEl = (linkEl: HTMLElement) => {
+            renderContainerEl = (linkEl: HTMLElement,app: App,leaf: WorkspaceLeaf) => {
                 const containerEl = linkEl.createDiv({
                     cls: "mufeng-mind-embedded-container",
                 });
@@ -215,6 +217,17 @@ export default function PreviewPlugin(
                 //doesn't navigate to the linked file when clicked
                 containerEl.addEventListener("click", (e) => {
                     e.stopPropagation();
+                    if (!(e.shiftKey || e.altKey) && !(e.ctrlKey || e.metaKey)) {
+                        return;
+                    }
+                    const sourcePath = (leaf.view as MarkdownView).file?.path ?? "";
+                    const file = findEmbeddedMindFile(app, e.currentTarget?.parentElement, sourcePath)
+                    openFile({
+                        file: file,
+                        app: app,
+                        newLeaf: (e.ctrlKey || e.metaKey) && !(e.shiftKey || e.altKey),
+                        leafBySplit: (e.ctrlKey || e.metaKey) && (e.shiftKey || e.altKey),
+                    });
                 });
                 return containerEl;
             };
@@ -239,4 +252,7 @@ export default function PreviewPlugin(
 
         }
     );
+
+
+
 }

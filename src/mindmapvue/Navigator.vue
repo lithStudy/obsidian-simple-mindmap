@@ -210,7 +210,8 @@ export default {
       // console.log('连续三次点击！');
       // 在这里执行你想触发的特定事件逻辑
       this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root)
-      // this.mindMap.view.fit()
+      //缩放思维导图至适应画布
+      this.mindMap.view.fit()
     }
 
   }

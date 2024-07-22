@@ -192,6 +192,13 @@ export default class SamplePlugin extends Plugin {
                     editor.getCursor().line,
                     editor.getCursor().ch + linkText.length
                 );
+
+                //Open file in a new tab and set it to active
+                await this.app.workspace.getLeaf(true).setViewState({
+                    type: MUFENG_MARKMIND_VIEW,
+                    active: true,
+                    state: { file: filePath },
+                });
             },
         });
 
@@ -444,7 +451,7 @@ export default class SamplePlugin extends Plugin {
         if (embedded) return filePath;
 
         //Open file in a new tab and set it to active
-        await app.workspace.getLeaf(true).setViewState({
+        await this.app.workspace.getLeaf(true).setViewState({
             type: MUFENG_MARKMIND_VIEW,
             active: true,
             state: { file: filePath },
