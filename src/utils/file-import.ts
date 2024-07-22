@@ -1,34 +1,11 @@
 import { App, Modal, Notice,  Setting, TFile } from 'obsidian';
 import {removeFileExtension} from "./file-operations";
-interface JsonImportSettings {
-    jsonName: string;
-    jsonNamePath: boolean;
-    jsonUrl: string;
-    folderName: string;
-    topField: string;
-    notePrefix: string;
-    noteSuffix: string;
-    // handleExistingNote: ExistingNotes;
-    forceArray: boolean;
-    multipleJSON: boolean;
-}
+import {MindSettings} from "../main";
 
-const DEFAULT_SETTINGS: JsonImportSettings = {
-    jsonName: "name",
-    jsonNamePath: false,
-    jsonUrl: "",
-    folderName: "Rewards",
-    topField: "",
-    notePrefix: "",
-    noteSuffix: "",
-    // handleExistingNote: ExistingNotes.KEEP_EXISTING,
-    forceArray: true,
-    multipleJSON: false
-}
 export class FileSelectionModal extends Modal {
     caller: Object;
     handler: Function;
-    default_settings : JsonImportSettings;
+    default_settings : MindSettings;
 
     constructor(app: App) {
         super(app);
@@ -38,7 +15,7 @@ export class FileSelectionModal extends Modal {
         this.caller  = caller;
         this.handler = handler;
     }
-    setDefaults(settings : JsonImportSettings) {
+    setDefaults(settings : MindSettings) {
         this.default_settings = settings;
     }
 

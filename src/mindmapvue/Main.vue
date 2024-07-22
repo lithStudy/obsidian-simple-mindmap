@@ -12,6 +12,7 @@
                 :mindMap="mindMap"
                 :app="app"
                 :contentEl="contentEl"
+                :mode="mode"
                 @remakModelToggle="remarkModelToggle"
     ></mind-tools>
 

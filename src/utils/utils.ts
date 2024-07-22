@@ -6,7 +6,7 @@
 import {EXTENSION_REGEX, WIKI_LINK_REGEX} from "../constants/constant";
 import {getWikiLinkText, stripDirectory, stripFileExtension} from "./link-utils";
 import {TFile} from "obsidian";
-
+import {App} from "obsidian";
 export const splitFileExtension = (
 	filePath: string
 ): [string, string] | null => {
@@ -71,7 +71,7 @@ export const openFile = (props: { file: TFile; app: App; newLeaf: boolean; leafB
 	//新创建分屏打开
 	if (leafBySplit) {
 		myLeaf = app.workspace.createLeafBySplit(myLeaf, 'vertical');
-		app.workspace.setActiveLeaf(myLeaf, false);
+		app.workspace.setActiveLeaf(myLeaf, {focus:false});
 	}
 
 

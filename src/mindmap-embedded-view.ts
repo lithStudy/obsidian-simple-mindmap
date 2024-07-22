@@ -1,8 +1,8 @@
 import {PluginValue, ViewPlugin, ViewUpdate} from "@codemirror/view";
 
 // import {loadEmbeddedMindApps} from "./embedded/embedded-app-manager";
-import {App, MarkdownView} from "obsidian";
-import {createApp} from "vue";
+import {App, MarkdownView, WorkspaceLeaf} from "obsidian";
+import {App as VueApp,createApp} from "vue";
 import {
     EVENT_APP_CSS_CHANGE,
     EVENT_APP_MIND_EMBEDDED_RESIZE,
@@ -29,7 +29,7 @@ export default function PreviewPlugin(
          */
         class EditingViewPlugin implements PluginValue {
             //记录创建的mind实例，将来卸载
-            private mindAppList:[]=[]
+            private mindAppList:VueApp<Element>[] =[]
             /**
              * Called whenever the markdown of the current leaf is updated.
              */
@@ -58,19 +58,19 @@ export default function PreviewPlugin(
                     }
                 }
 
-                app.workspace.off(EVENT_APP_RESIZE);
-                app.workspace.off(EVENT_APP_CSS_CHANGE)
-                app.workspace.off(EVENT_APP_QUICK_PREVIEW)
-                app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE)
+                app.workspace.off(EVENT_APP_RESIZE, undefined as any);
+                app.workspace.off(EVENT_APP_CSS_CHANGE, undefined as any)
+                app.workspace.off(EVENT_APP_QUICK_PREVIEW, undefined as any)
+                app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE, undefined as any)
 
-                app.workspace.off(EVENT_APP_MIND_REFRESH);
-                app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE);
-                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW)
-                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
-                app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY)
-                app.workspace.off(EVENT_APP_MIND_EXPORT)
+                app.workspace.off(EVENT_APP_MIND_REFRESH, undefined as any);
+                app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE, undefined as any);
+                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW, undefined as any)
+                app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
+                app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY, undefined as any)
+                app.workspace.off(EVENT_APP_MIND_EXPORT, undefined as any)
 
-                app.workspace.off(EVENT_MIND_NODE_ACTIVE)
+                app.workspace.off(EVENT_MIND_NODE_ACTIVE, undefined as any)
             }
 
 
@@ -221,7 +221,8 @@ export default function PreviewPlugin(
                         return;
                     }
                     const sourcePath = (leaf.view as MarkdownView).file?.path ?? "";
-                    const file = findEmbeddedMindFile(app, e.currentTarget?.parentElement, sourcePath)
+                    const targetElement = e.currentTarget as HTMLElement; // 断言当前目标为 HTMLElement
+                    const file = findEmbeddedMindFile(app, targetElement.parentElement, sourcePath)
                     openFile({
                         file: file,
                         app: app,

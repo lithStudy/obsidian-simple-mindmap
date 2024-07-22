@@ -1,4 +1,4 @@
-import {TextFileView} from "obsidian";
+import {TextFileView, WorkspaceLeaf} from "obsidian";
 import {createApp, App as VueApp} from "vue";
 // import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
@@ -23,13 +23,13 @@ export class MufengMindMapView extends TextFileView {
     private pluginId: string;
     private pluginVersion: string;
     //思维导图对象
-    private markMind: MindMap;
+    private markMind: { };
     //思维导图数据集
     private markMindData: {};
 
-    private mindApp: {};
+    private mindApp: VueApp;
 
-    private leaf: WorkspaceLeaf;
+    // public leaf: WorkspaceLeaf;
 
 
     constructor(leaf: WorkspaceLeaf, pluginId: string, pluginVersion: string) {
@@ -148,16 +148,16 @@ export class MufengMindMapView extends TextFileView {
         this.markMind = null;
         this.contentEl.empty();
         //重要：这个监听不销毁，会导致每次打开新的思维导图产生的vue实例无法销毁
-        this.app.workspace.off(EVENT_APP_MIND_REFRESH);
-        this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE);
-        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
-        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE)
-        this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY)
-        this.app.workspace.off(EVENT_APP_MIND_EXPORT)
-        this.app.workspace.off(EVENT_APP_RESIZE);
-        this.app.workspace.off(EVENT_APP_CSS_CHANGE);
-        this.app.workspace.off(EVENT_APP_QUICK_PREVIEW)
-        this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE)
+        this.app.workspace.off(EVENT_APP_MIND_REFRESH, undefined as any);
+        this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE, undefined as any);
+        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
+        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
+        this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY, undefined as any)
+        this.app.workspace.off(EVENT_APP_MIND_EXPORT, undefined as any)
+        this.app.workspace.off(EVENT_APP_RESIZE, undefined as any);
+        this.app.workspace.off(EVENT_APP_CSS_CHANGE, undefined as any);
+        this.app.workspace.off(EVENT_APP_QUICK_PREVIEW, undefined as any)
+        this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE, undefined as any)
     }
 
 

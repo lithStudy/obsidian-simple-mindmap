@@ -7,8 +7,8 @@
         ref="mindToolsBox"
     >
       <div @click="resize()" class="toolsButton">重定位</div>
-      <div @click="remark()" class="toolsButton">备注</div>
-      <div @click="priority()" class="toolsButton">优先级</div>
+      <div @click="remark()" v-if="this.mode !== 'embedded' && this.mode !== 'preview'" id="remarkButton" class="toolsButton">备注</div>
+      <div @click="priority()" v-if="this.mode !== 'embedded' && this.mode !== 'preview'" id="priorityButton" class="toolsButton">优先级</div>
     </div>
   </div>
 
@@ -31,6 +31,9 @@ export default {
     },
     contentEl:{
       required:false
+    },
+    mode: {
+      required: false
     }
   },
   data() {
@@ -87,14 +90,6 @@ export default {
         // this.mindMap.resize();
         this.setPosition();
       }, 100);
-
-      // this.showRemark = !this.showRemark;
-      // if(this.showRemark){
-      //   if (this.mindMap.renderer.activeNodeList.length <= 0) {
-      //     return
-      //   }
-      //   this.remarkContent=this.mindMap.renderer.activeNodeList[0].getData('note')
-      // }
     },
     saveRemark(){
       if (this.mindMap.renderer.activeNodeList.length <= 0) {
