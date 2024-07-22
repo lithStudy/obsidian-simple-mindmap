@@ -148,7 +148,7 @@ export class MufengMindMapView extends TextFileView {
         this.markMind = null;
         this.contentEl.empty();
         //重要：这个监听不销毁，会导致每次打开新的思维导图产生的vue实例无法销毁
-        this.app.workspace.off(EVENT_APP_MIND_REFRESH, undefined as any);
+        // this.app.workspace.off(EVENT_APP_MIND_REFRESH, undefined as any);
         this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE, undefined as any);
         this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
         this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
@@ -157,7 +157,7 @@ export class MufengMindMapView extends TextFileView {
         this.app.workspace.off(EVENT_APP_RESIZE, undefined as any);
         this.app.workspace.off(EVENT_APP_CSS_CHANGE, undefined as any);
         this.app.workspace.off(EVENT_APP_QUICK_PREVIEW, undefined as any)
-        this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE, undefined as any)
+        // this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE, undefined as any)
     }
 
 

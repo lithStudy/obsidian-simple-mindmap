@@ -80,9 +80,10 @@ export default {
     this.mindMap.on(EVENT_MIND_VIEW_DATA_CHANGE, this.view_data_change)
     this.mindMap.on(EVENT_MIND_NODE_RENDER_END, this.view_data_change)
 
-    this.app.workspace.on(EVENT_APP_CSS_CHANGE, () => {
-      this.updateTheme()
-    }, this.app)
+    // this.app.workspace.on(EVENT_APP_CSS_CHANGE, () => {
+    //   this.updateTheme()
+    // }, this.app)
+    this.app.workspace.on(EVENT_APP_CSS_CHANGE, this.updateTheme)
 
     
 
@@ -91,7 +92,7 @@ export default {
     this.mindMap.off(EVENT_MIND_DATA_CHANGE, this.view_data_change)
     this.mindMap.off(EVENT_MIND_VIEW_DATA_CHANGE, this.view_data_change)
     this.mindMap.off(EVENT_MIND_NODE_RENDER_END, this.view_data_change)
-    this.app.workspace.off(EVENT_APP_CSS_CHANGE);
+    this.app.workspace.off(EVENT_APP_CSS_CHANGE,this.updateTheme);
   },
   methods: {
     toggle_mini_map(show) {
