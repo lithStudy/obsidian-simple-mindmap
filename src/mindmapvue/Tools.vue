@@ -16,10 +16,10 @@
 
 <script>
 // import { useEmitter  } from 'vue'
-import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
+// import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
 import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown.js'
 import { Notice } from "obsidian";
-import {EVENT_APP_CSS_CHANGE, EVENT_APP_MIND_EXPORT, EVENT_APP_MIND_NODE_PRIORITY} from "../constants/constant";
+import {EVENT_APP_CSS_CHANGE, EVENT_APP_MIND_EXPORT, EVENT_APP_MIND_NODE_PRIORITY, EVENT_APP_LAYOUT_CHANGE, EVENT_APP_RESIZE} from "../constants/constant";
 
 export default {
   props: {
@@ -50,14 +50,15 @@ export default {
       showRemark:true,
       remarkContent:"",
       clickCount: 0,         // 点击次数计数器
-      clickTimestamps: []   // 点击时间戳数组
+      clickTimestamps: [],   // 点击时间戳数组
+      resizeTimer: null
     }
   },
   computed: {
     // ...mapState(['isDark']),
   },
   mounted() {
-    this.updateTheme()
+    // this.updateTheme()
     this.setPosition();
     this.app.workspace.on(EVENT_APP_CSS_CHANGE, () => {
       this.updateTheme()
@@ -67,11 +68,24 @@ export default {
 
     this.app.workspace.on(EVENT_APP_MIND_EXPORT,this.exportData)
 
+    // 监听工作区布局变化
+    this.app.workspace.on('layout-change', () => {
+        this.setPosition();
+    });
+
+    // 监听窗口大小调整
+    this.app.workspace.on('resize', () => {
+        this.setPosition();
+    });
   },
   destroyed() {
     this.app.workspace.off(EVENT_APP_CSS_CHANGE);
     this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY);
     this.app.workspace.off(EVENT_APP_MIND_EXPORT)
+
+    // 清理事件监听
+    this.app.workspace.off(EVENT_APP_LAYOUT_CHANGE);
+    this.app.workspace.off(EVENT_APP_RESIZE);
   },
   methods: {
     resize(){
@@ -84,10 +98,12 @@ export default {
     remark(){
       console.log("点击备注按钮")
       this.$emit('remakModelToggle', '新的值');
-
-      setTimeout(()=> {
-        // debugger
-        // this.mindMap.resize();
+      
+      if(this.resizeTimer) {
+        clearTimeout(this.resizeTimer);
+      }
+      
+      this.resizeTimer = setTimeout(() => {
         this.setPosition();
       }, 100);
     },
@@ -165,6 +181,11 @@ export default {
       
     }
 
+  },
+  beforeDestroy() {
+    if(this.resizeTimer) {
+      clearTimeout(this.resizeTimer);
+    }
   }
 }
 </script>

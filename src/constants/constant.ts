@@ -15,6 +15,7 @@ export const FILE_EXTENSION = "mind";
  */
 export const EVENT_APP_RESIZE='resize'
 export const EVENT_APP_CSS_CHANGE='css-change'
+export const EVENT_APP_LAYOUT_CHANGE='layout-change'
 export const EVENT_APP_QUICK_PREVIEW='quick-preview'
 export const EVENT_APP_LEAF_CHANGE_ACTIVE='active-leaf-change'
 /**

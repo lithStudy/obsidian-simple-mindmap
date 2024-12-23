@@ -40,12 +40,17 @@
 <script lang="ts">
 import {
   createApp,
+  reactive,
+  onMounted,
+  onUnmounted,
+  watch,
+  ref,
+  computed,
+  nextTick,
+  onBeforeUnmount
 } from "vue";
 import MindMap from "simple-mind-map";
-import Drag from "simple-mind-map/src/plugins/Drag.js"
-import KeyboardNavigation from 'simple-mind-map/src/plugins/KeyboardNavigation.js'
-// import RichText from 'simple-mind-map/src/plugins/RichText.js'
-import MiniMap from 'simple-mind-map/src/plugins/MiniMap.js'
+// import { Drag,KeyboardNavigation,MiniMap,Export,ExportPDF } from "simple-mind-map/types/src/plugins";
 import {EventRef, MarkdownView, WorkspaceLeaf} from "obsidian";
 import {
   EVENT_APP_CSS_CHANGE,
@@ -71,11 +76,20 @@ import NodeNote from 'NodeEdit.vue'
 import NodeNoteContentShow from 'NodeNoteContentShow.vue'
 // import { keyMap } from 'simple-mind-map/src/core/command/keyMap.js'
 // import TextEdit from 'simple-mind-map/src/core/render/TextEdit'
-import Export from 'simple-mind-map/src/plugins/Export.js'
-import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
+
 import { MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
+import { debounce } from 'lodash';
+import { generateUniqueId } from '../utils/utils';
 
+const plugins = MindMap.definePlugins();
+const { Drag, KeyboardNavigation, MiniMap, Export, ExportPDF } = plugins;
 
+// 在文件开头添加这个接口扩展
+declare module "obsidian" {
+    interface WorkspaceLeaf {
+        id: string;
+    }
+}
 
 export default {
   name: 'SimpleMindMap',
@@ -86,64 +100,51 @@ export default {
     NodeNote
   },
   props: {
-    mindFile: {
-      required: false
-    },
-    initMindData: {
-      required: false
-    },
+    mindFile: Object,
+    initMindData: Object,
     mindContainerId: {
+      type: String,
       required: true
     },
-    app: {
-      required: false
-    },
-    //embedded、edit、preview
+    app: Object,
     mode: {
-      required: false
+      type: String,
+      default: 'edit',
+      validator: (value: string) => {
+        return ['embedded', 'edit', 'preview'].includes(value)
+      }
     },
-    initNoteMode:{
-      required:false
-    },
-    initElementHeight: {
-      required: false
-    },
+    initNoteMode: String,
+    initElementHeight: String,
     showMiniMap: {
-      required: false,
-      default: () => false
+      type: Boolean,
+      default: false
     },
     showMindTools: {
-      required: false,
-      default: () => false
+      type: Boolean,
+      default: false
     },
-    contentEl: {
-      required: false
-    },
+    contentEl: HTMLElement,
     leaf: {
+      type: Object,
       required: true
-    },
-
+    }
   },
   data() {
     return {
-      mydata: {
+      mydata: reactive({
         mindMapData: MARKMIND_DEFAULT_REAL_DATA,
-        compId: 0.0,
+        compId: generateUniqueId(),
         mindMode: 'edit',
         mindTheme: 'dark',
         initHeight: '1000px',
-        mindMapContainerWidth:'100%',
-        noteContainerWidth:'20%',
-      },
-      firstRender: true,
-      mindMap:null as MindMap,
-      el_temp:null as Element,
-      show: false,
-      left: 0,
-      top: 0,
-      mindMapReady:false,
-      noteMode:'slide',
-      noteContext:"",
+        mindMapContainerWidth: '100%',
+        noteContainerWidth: '20%'
+      }),
+      mindMap: null as MindMap | null,
+      mindMapReady: false,
+      noteMode: 'slide',
+      noteContext: ''
     }
   },
   created() {
@@ -195,8 +196,10 @@ export default {
     this.offListener();
     //由于mindmap中有个匿名的window监听事件在监听快捷键可能导致快捷键操作被拦截，我没法销毁这个监听，只能将快捷键暂停
     this.mindMap.keyCommand.pause();
-
+    // 移除所有事件监听
+    this.mindMap.removeAllListeners();
     this.mindMap.destroy();
+
     this.mindMap=null;
   },
   beforeDestroy() {
@@ -226,7 +229,7 @@ export default {
         console.log("不存在可用的画布容器")
         return
       }
-      //注册拖拽节点
+      //册拖拽节点
       MindMap.usePlugin(Drag)
       //注册键盘导航
       MindMap.usePlugin(KeyboardNavigation)
@@ -297,7 +300,7 @@ export default {
       this.firstRender = false;
     },
     embedResizeMethodRef(leaf: WorkspaceLeaf){
-      //是当前页面，且是嵌入模式
+      //是当前页，且是嵌入模式
       if (this.leaf.id === leaf.id && this.mode==='embedded') {
         this.mindResize();
       }
@@ -323,7 +326,7 @@ export default {
     refreshMethodRef(newCompId, newMindData, newFilePath){
       console.log("监听到思维导图刷新事件，当前思维导图为：" + this.mydata.compId+"，通知刷新的思维导图为："+newCompId)
       // return;
-      //如果组件id不一样且文件是同一个，重新渲染，以保证相同文件在其他视图的数据也被修改了
+      //如果件id不一样且文件是同一个，重新渲染，以保证相同文件在其他视图的数据也被修改了
       if (this.mydata.compId !== newCompId && newFilePath === this.mindFile.path) {
         // console.log('监听到其他视图的刷新事件：当前视图id：' + this.mydata.compId + ",其他视图：" + newCompId)
         if (JSON.stringify(this.mindMap.getData(false)) === JSON.stringify(newMindData)) {
@@ -352,9 +355,6 @@ export default {
         }
         textEdit.show({node:this.mindMap.renderer.activeNodeList[0]})
       })
-    },
-    mindDataChangeMethRef(...args){
-      this.throttleSave(args[0]);
     },
     handleTextarea(){
       this.saveNote();
@@ -414,7 +414,7 @@ export default {
       if (!this.el_temp) {
         return
       }
-      //视窗大小为0，说明焦点不在当前页面，不重置大小（思维导图的尺寸定位是根据视窗大小来的，如果焦点不在当前页面，视窗获取到的宽度和高度就是0）
+      //视窗大小为0，说明焦点��在当前页面，不重置大小（思维导图的尺寸定位根据视窗大小来的，如果焦点不在当前页面，视窗获取到的宽度和高度就是0）
       const elRect = this.el_temp.getBoundingClientRect()
       const widthTemp = elRect.width
       const heightTemp = elRect.height

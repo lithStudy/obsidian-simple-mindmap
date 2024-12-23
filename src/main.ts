@@ -167,6 +167,8 @@ export default class SamplePlugin extends Plugin {
             callback: async () => {
                 await this.newMindMapFile(null);
             },
+            icon: "mindmap-icon.svg"
+            
         });
 
         this.addCommand({

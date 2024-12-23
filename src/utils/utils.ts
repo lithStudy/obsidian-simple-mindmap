@@ -101,3 +101,6 @@ export const openFile = (props: { file: TFile; app: App; newLeaf: boolean; leafB
 
 };
 
+export function generateUniqueId(): string {
+    return Math.random().toString(36).substring(2);
+}

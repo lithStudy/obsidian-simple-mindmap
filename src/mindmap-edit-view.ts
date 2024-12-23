@@ -31,6 +31,8 @@ export class MufengMindMapView extends TextFileView {
 
     // public leaf: WorkspaceLeaf;
 
+    private eventRefs: { [key: string]: any } = {};
+
 
     constructor(leaf: WorkspaceLeaf, pluginId: string, pluginVersion: string) {
         super(leaf);
@@ -143,21 +145,29 @@ export class MufengMindMapView extends TextFileView {
 
     async onClose() {
         console.log('mindmap-edit-vue onClose')
-        this.mindApp.unmount();
-        // this.markMind=null;
-        this.markMind = null;
-        this.contentEl.empty();
-        //重要：这个监听不销毁，会导致每次打开新的思维导图产生的vue实例无法销毁
-        // this.app.workspace.off(EVENT_APP_MIND_REFRESH, undefined as any);
-        this.app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE, undefined as any);
-        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
-        this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
-        this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY, undefined as any)
-        this.app.workspace.off(EVENT_APP_MIND_EXPORT, undefined as any)
-        this.app.workspace.off(EVENT_APP_RESIZE, undefined as any);
-        this.app.workspace.off(EVENT_APP_CSS_CHANGE, undefined as any);
-        this.app.workspace.off(EVENT_APP_QUICK_PREVIEW, undefined as any)
-        // this.app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE, undefined as any)
+        if (this.mindApp) {
+            this.mindApp.unmount();
+            this.markMind = null;
+            this.contentEl.empty();
+        }
+
+        // 创建事件列表数组
+        const events = [
+            EVENT_APP_MIND_EMBEDDED_RESIZE,
+            EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, 
+            EVENT_APP_MIND_NODE_PRIORITY,
+            EVENT_APP_MIND_EXPORT,
+            EVENT_APP_RESIZE,
+            EVENT_APP_CSS_CHANGE,
+            EVENT_APP_QUICK_PREVIEW,
+            EVENT_APP_LEAF_CHANGE_ACTIVE,
+            EVENT_APP_MIND_REFRESH
+        ];
+
+        // 统一清理事件监听
+        events.forEach(event => {
+            this.app.workspace.off(event, this.eventRefs[event]);
+        });
     }
 
 
@@ -172,13 +182,12 @@ export class MufengMindMapView extends TextFileView {
 
     onload() {
         super.onload();
+        this.eventRefs[EVENT_APP_QUICK_PREVIEW] = () => {
+            console.log(EVENT_APP_QUICK_PREVIEW)
+        };
         this.registerEvent(
-            this.app.workspace.on(EVENT_APP_QUICK_PREVIEW, () => {
-                console.log(EVENT_APP_QUICK_PREVIEW)
-            }, this)
+            this.app.workspace.on(EVENT_APP_QUICK_PREVIEW, this.eventRefs[EVENT_APP_QUICK_PREVIEW], this)
         );
-
-
     }
 
 
