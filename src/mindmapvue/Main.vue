@@ -84,6 +84,7 @@ import NodeNoteContentShow from 'NodeNoteContentShow.vue'
 import { MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
 import { debounce } from 'lodash';
 import { generateUniqueId } from '../utils/utils';
+import { parseWikiLinks } from '../utils/link-parser';
 
 
 // 在文件开头添加这个接口扩展
@@ -191,6 +192,10 @@ export default {
       this.mindMapReady = true;
       this.setPosition();
     }
+   
+
+    // 强制重新渲染
+    this.mindMap.render();
 
   },
   unmounted(){
@@ -265,7 +270,38 @@ export default {
           hide: () => {
           }
         },
+        customHyperlinkJump:(url,node)=>{
+          console.log("customHyperlinkJump",url,node)
+
+          this.handleLink(url);
+        }        
+        
       });
+    },
+    // 处理链接
+    handleLink(href, isNewWindow = true) {
+        // 处理内部链接 [[文件名]]
+        const wikiLinkMatch = href.match(/\[\[(.*?)\]\]/);
+        if (wikiLinkMatch) {
+            const path = wikiLinkMatch[1];
+            this.openInternalLink(path, isNewWindow);
+            return;
+        }
+
+        // 处理文件路径
+        const file = this.app.metadataCache.getFirstLinkpathDest(href, '');
+        if (file) {
+            this.openInternalLink(file.path, isNewWindow);
+            return;
+        }
+
+        // 处理外部链接
+        window.open(href, '_blank');
+    },
+
+    // 打开内部链接
+    openInternalLink(path, isNewWindow) {
+        this.app.workspace.openLinkText(path, '', isNewWindow);
     },
     remarkInputActive(){
       //存在激活的节点时才继续
@@ -422,7 +458,7 @@ export default {
       if (!this.el_temp) {
         return
       }
-      //视窗大小为0，说明焦点��在当前页面，不重置大小（思维导图的尺寸定位根据视窗大小来的，如果焦点不在当前页面，视窗获取到的宽度和高度就是0）
+      //视窗大小为0，说明焦点不在当前页面，不重置大小（思维导图的尺寸定位根据视窗大小来的，如果焦点不在当前页面，视窗获取到的宽度和高度就是0）
       const elRect = this.el_temp.getBoundingClientRect()
       const widthTemp = elRect.width
       const heightTemp = elRect.height
@@ -485,6 +521,9 @@ export default {
         this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
       }, SAVE_THROTTLE_TIME_MILLIS),
 
+
+      
+
   }
 }
 
@@ -526,5 +565,14 @@ export default {
 .remarkTextarea{
     height: 100%;
     width: 100%
+}
+.mind-map-wiki-link {
+    color: var(--link-color);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.mind-map-wiki-link:hover {
+    color: var(--link-color-hover);
 }
 </style>
