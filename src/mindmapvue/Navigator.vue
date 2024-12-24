@@ -74,7 +74,10 @@ export default {
   },
   mounted() {
     this.init()
-    this.setPosition();
+    // 确保在DOM完全渲染后再设置位置
+    this.$nextTick(() => {
+      this.setPosition();
+    });
 
     this.mindMap.on(EVENT_MIND_DATA_CHANGE, this.view_data_change)
     this.mindMap.on(EVENT_MIND_VIEW_DATA_CHANGE, this.view_data_change)
@@ -180,9 +183,11 @@ export default {
       }
     },
     setPosition() {
+      if(!this.contentEl) return;
       // 获取父容器和子元素
       const parentElement = this.contentEl.parentElement
       const childElement = this.contentEl.querySelector('#mindMapContainer');
+      if(!parentElement || !childElement) return;
       // 获取子元素相对于父容器的位置信息
       const parentRect = parentElement.getBoundingClientRect();
       const childRect = childElement.getBoundingClientRect();

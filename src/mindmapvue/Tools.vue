@@ -124,8 +124,10 @@ export default {
     },
     setPosition(){
         // 获取父容器和子元素
+        if(!this.contentEl) return;
         const parentElement = this.contentEl.parentElement
         const childElement = this.contentEl.querySelector('#mindMapContainer');
+        if(!parentElement || !childElement) return;
 
         // 获取子元素相对于父容器的位置信息
         const parentRect = parentElement.getBoundingClientRect();

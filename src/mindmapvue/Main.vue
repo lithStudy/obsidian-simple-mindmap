@@ -50,7 +50,11 @@ import {
   onBeforeUnmount
 } from "vue";
 import MindMap from "simple-mind-map";
-// import { Drag,KeyboardNavigation,MiniMap,Export,ExportPDF } from "simple-mind-map/types/src/plugins";
+import Drag from "simple-mind-map/src/plugins/Drag.js";
+import KeyboardNavigation from "simple-mind-map/src/plugins/KeyboardNavigation.js";
+import MiniMap from "simple-mind-map/src/plugins/MiniMap.js";
+import Export from "simple-mind-map/src/plugins/Export.js";
+import ExportPDF from "simple-mind-map/src/plugins/ExportPDF.js";
 import {EventRef, MarkdownView, WorkspaceLeaf} from "obsidian";
 import {
   EVENT_APP_CSS_CHANGE,
@@ -81,8 +85,6 @@ import { MARKMIND_DEFAULT_REAL_DATA} from "../utils/mind-content-util";
 import { debounce } from 'lodash';
 import { generateUniqueId } from '../utils/utils';
 
-const plugins = MindMap.definePlugins();
-const { Drag, KeyboardNavigation, MiniMap, Export, ExportPDF } = plugins;
 
 // 在文件开头添加这个接口扩展
 declare module "obsidian" {
@@ -196,11 +198,15 @@ export default {
     this.offListener();
     //由于mindmap中有个匿名的window监听事件在监听快捷键可能导致快捷键操作被拦截，我没法销毁这个监听，只能将快捷键暂停
     this.mindMap.keyCommand.pause();
-    // 移除所有事件监听
-    this.mindMap.removeAllListeners();
+    
+    // 使用定义在 constants/constant.ts 中的事件常量
+    this.mindMap.off(EVENT_MIND_NODE_RENDER_END);  // node_tree_render_end
+    this.mindMap.off(EVENT_MIND_DATA_CHANGE);      // data_change
+    this.mindMap.off(EVENT_MIND_THEME_CHANGE);     // view_theme_change
+    this.mindMap.off(EVENT_MIND_NODE_ACTIVE);      // node_active
+    
     this.mindMap.destroy();
-
-    this.mindMap=null;
+    this.mindMap = null;
   },
   beforeDestroy() {
     console.log("Main.vue beforeDestroy")
@@ -373,10 +379,12 @@ export default {
       }
     },
     setPosition() {
+      if(!this.contentEl) return;
       // debugger
       // 获取父容器和子元素
       const parentElement = this.contentEl.parentElement
       const childElement = this.contentEl.querySelector('#mindMapContainer');
+      if(!parentElement || !childElement) return;
       // 获取子元素相对于父容器的位置信息
       const parentRect = parentElement.getBoundingClientRect();
       const childRect = childElement.getBoundingClientRect();

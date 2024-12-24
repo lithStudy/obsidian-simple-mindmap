@@ -13,6 +13,8 @@ interface MindMapOptions {
         expand?: boolean;
         // 子节点
         children?: any[];
+        // 链接
+        link?: string;
         // 其他自定义数据
         [key: string]: any;
     };
@@ -54,7 +56,7 @@ interface MindMap {
     on(event: string, callback: Function): void;           // 监听事件
     off(event: string, callback: Function): void;          // 移除事件监听
     removeAllListeners(): void;                           // 移除所有事件监听
-    destroy(): void;                                      // 销毁实例
+    destroy(): void;                                      // 销���实例
     resize(): void;                                       // 调整大小
     setTheme(theme: string): void;                        // 设置主题
     getData(): any;                                       // 获取数据
