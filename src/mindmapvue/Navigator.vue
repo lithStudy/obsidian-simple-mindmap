@@ -110,9 +110,7 @@ export default {
       })
     },
     view_data_change() {
-      //TODO 这里用这种方式画小地图会出现一个问题：父组件被卸载了，这个小地图还在画，导致报错，考虑使用 _.debounce 替代（保存可能也有一样的问题）
       this.throttleDrawMiniMap();
-      // this.drawMiniMap()
     },
     init() {
       let {width, height} = this.$refs.navigatorBox.getBoundingClientRect()

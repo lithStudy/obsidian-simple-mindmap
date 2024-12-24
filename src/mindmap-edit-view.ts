@@ -2,7 +2,6 @@ import {TextFileView, WorkspaceLeaf} from "obsidian";
 import {createApp, App as VueApp} from "vue";
 // import SimpleMindMap from "./mindmapvue/simple-mind-map.vue";
 import SimpleMindMap from "./mindmapvue/Main.vue";
-import MindMap from "simple-mind-map";
 import {
     EVENT_APP_CSS_CHANGE,
     EVENT_APP_MIND_EMBEDDED_RESIZE,
