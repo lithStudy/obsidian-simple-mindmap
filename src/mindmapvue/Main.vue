@@ -25,11 +25,29 @@
 
     <div id="node" v-if="noteMode === 'slide'" >
       <div id="remarkDiv" class="remarkDiv" :style="{ height: mydata.initHeight }">
-        <textarea id="nodeNote"  class="remarkTextarea" v-model="noteContext" 
-          @input="handleTextarea"
+        <textarea 
+          id="nodeNote"  
+          class="remarkTextarea" 
+          v-model="noteContext" 
+          @input="handleTextareaInput"
           @focus="handleTextareaForFocus"
           @blur="handleTextareaForBlur"
-          @keydown.esc="handleTextareaEsc">111</textarea>
+          @keydown="handleTextareaKeydown"
+          @keydown.esc="handleTextareaEsc">
+        </textarea>
+        
+        <!-- 添加文件建议列表 -->
+        <div v-if="showFileSuggestions" 
+             class="file-suggestions" 
+             :style="suggestionPosition">
+          <div v-for="(file, index) in filteredFiles" 
+               :key="file.path"
+               :class="['suggestion-item', { active: index === activeIndex }]"
+               @click="selectFile(file)"
+               @mouseenter="activeIndex = index">
+            {{ file.basename }}
+          </div>
+        </div>
       </div>
     </div>
     <!-- <NodeNote></NodeNote> -->
@@ -146,7 +164,17 @@ export default {
       mindMap: null as MindMap | null,
       mindMapReady: false,
       noteMode: 'slide',
-      noteContext: ''
+      noteContext: '',
+      showFileSuggestions: false,
+      files: [],
+      filteredFiles: [],
+      activeIndex: 0,
+      suggestionPosition: {
+        top: '0px',
+        left: '0px'
+      },
+      currentInputPos: 0,
+      searchText: ''
     }
   },
   created() {
@@ -258,7 +286,7 @@ export default {
         //主题：logicalStructure（逻辑结构图）、mindMap（思维导图）、organizationStructure（组织结构图）、catalogOrganization（目录组织图）、timeline（时间轴）、timeline2（时间轴2）、fishbone（鱼骨图）、verticalTimeline（v0.6.6+竖向时间轴）
         layout: 'mindMap',
         theme: this.mydata.mindTheme,
-        //允许拖拽
+        //允许拖
         enableFreeDrag: true,
         readonly: this.mydata.mindMode === 'preview'||this.mydata.mindMode === 'embedded' ? true : false,
         // initRootNodePosition: ['center', 'center'],
@@ -306,7 +334,7 @@ export default {
         this.app.workspace.openLinkText(path, '', isNewWindow);
     },
     remarkInputActive(){
-      //存在激活的节点时才继续
+      //存在���活的节点时才继续
       if (this.mindMap.renderer.activeNodeList.length <= 0) {
         return
       }
@@ -522,10 +550,137 @@ export default {
         //触发刷新事件用于通知其他视图刷新
         this.app.workspace.trigger(EVENT_APP_MIND_REFRESH, this.mydata.compId, mindDataTempParam, this.mindFile.path);
       }, SAVE_THROTTLE_TIME_MILLIS),
-
-
+    handleTextareaInput(event) {
+      const textarea = event.target;
+      const value = textarea.value;
+      const cursorPosition = textarea.selectionStart;
       
-
+      // 获取光标前的文本
+      const beforeText = value.slice(0, cursorPosition);
+      const match = beforeText.match(/\[\[([^\]]*)$/);
+      
+      if (match) {
+        // 如果输入了 [[ 开始搜索文件
+        this.searchText = match[1];
+        this.showFileSuggestions = true;
+        this.currentInputPos = cursorPosition;
+        
+        // 获取所有文件并过滤
+        this.files = this.app.vault.getFiles();
+        this.filteredFiles = this.files.filter(file => 
+          file.basename.toLowerCase().includes(this.searchText.toLowerCase())
+        ).slice(0, 10); // 限制显示数量
+        
+        // 计算建议框位置
+        this.updateSuggestionPosition(textarea);
+        
+        this.activeIndex = 0;
+      } else {
+        this.showFileSuggestions = false;
+      }
+      
+      // 调用原有的处理方法
+      this.handleTextarea();
+    },
+    updateSuggestionPosition(textarea) {
+      // 获取文本内容直到光标位置
+      const textBeforeCursor = textarea.value.substring(0, textarea.selectionStart);
+      
+      // 创建临时元素来计算文本尺寸
+      const temp = document.createElement('div');
+      temp.style.cssText = window.getComputedStyle(textarea).cssText;
+      temp.style.height = 'auto';
+      temp.style.width = textarea.offsetWidth + 'px';
+      temp.style.position = 'absolute';
+      temp.style.visibility = 'hidden';
+      temp.style.whiteSpace = 'pre-wrap';
+      temp.style.wordWrap = 'break-word';
+      temp.innerHTML = textBeforeCursor.replace(/\n/g, '<br>');
+      
+      document.body.appendChild(temp);
+      
+      // 创建一个 span 来获取光标位置
+      const span = document.createElement('span');
+      span.innerHTML = '.';
+      temp.appendChild(span);
+      
+      // 计算位置
+      const { offsetLeft: spanX, offsetTop: spanY } = span;
+      const textareaRect = textarea.getBoundingClientRect();
+      
+      // 清理临时元素
+      document.body.removeChild(temp);
+      
+      // 计算最终位置
+      const top = spanY - textarea.scrollTop;
+      const left = Math.min(spanX, textarea.offsetWidth - 200); // 确保不会超出右边界
+      
+      this.suggestionPosition = {
+        top: `${top + 20}px`, // 在光标下方20px处显示
+        left: `${left}px`
+      };
+    },
+    handleTextareaKeydown(event) {
+      if (!this.showFileSuggestions) return;
+      
+      switch(event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          this.activeIndex = (this.activeIndex + 1) % this.filteredFiles.length;
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          this.activeIndex = (this.activeIndex - 1 + this.filteredFiles.length) % this.filteredFiles.length;
+          break;
+        case 'Enter':
+          event.preventDefault();
+          if (this.filteredFiles[this.activeIndex]) {
+            this.selectFile(this.filteredFiles[this.activeIndex]);
+          }
+          break;
+      }
+    },
+    selectFile(file) {
+      const beforeText = this.noteContext.slice(0, this.currentInputPos - this.searchText.length - 2);
+      const afterText = this.noteContext.slice(this.currentInputPos);
+      
+      this.noteContext = beforeText + `[[${file.basename}]]` + afterText;
+      this.showFileSuggestions = false;
+      this.saveNote();
+    },
+    // 获取光标坐标的辅助函数
+    getCaretCoordinates(element, position) {
+      const { offsetLeft, offsetTop } = element;
+      const div = document.createElement('div');
+      const style = div.style;
+      const computed = window.getComputedStyle(element);
+      
+      style.whiteSpace = 'pre-wrap';
+      style.wordWrap = 'break-word';
+      style.position = 'absolute';
+      style.visibility = 'hidden';
+      
+      // 复制 textarea 的样式
+      for (const prop of computed) {
+        style[prop] = computed[prop];
+      }
+      
+      div.textContent = element.value.slice(0, position);
+      
+      const span = document.createElement('span');
+      span.textContent = element.value.slice(position) || '.';
+      div.appendChild(span);
+      
+      document.body.appendChild(div);
+      const coordinates = {
+        top: offsetTop + span.offsetTop,
+        left: offsetLeft + span.offsetLeft,
+        height: parseInt(computed.lineHeight)
+      };
+      document.body.removeChild(div);
+      
+      return coordinates;
+    }
   }
 }
 
@@ -576,5 +731,34 @@ export default {
 
 .mind-map-wiki-link:hover {
     color: var(--link-color-hover);
+}
+
+.file-suggestions {
+  position: absolute;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+}
+
+.suggestion-item {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.suggestion-item.active {
+  background-color: var(--background-modifier-hover);
+}
+
+.suggestion-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.remarkDiv {
+  position: relative;
 }
 </style>
