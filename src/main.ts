@@ -19,7 +19,8 @@ import {
     EVENT_APP_MIND_EXPORT,
     EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE,
     EVENT_APP_MIND_NODE_PRIORITY,
-    FILE_EXTENSION
+    FILE_EXTENSION,
+    EVENT_APP_MIND_NODE_LINK
 } from "./constants/constant";
 import {getBasename} from "./utils/link-utils";
 import {MARKMIND_DEFAULT_REAL_DATA} from "./utils/mind-content-util";
@@ -202,6 +203,13 @@ export default class SamplePlugin extends Plugin {
                     state: { file: filePath },
                 });
             },
+        });
+        this.addCommand({
+            id: 'set-node-link',
+            name: 'set link',
+            callback: () => {
+                this.app.workspace.trigger(EVENT_APP_MIND_NODE_LINK);
+            }
         });
 
         // this.addCommand({

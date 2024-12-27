@@ -27,6 +27,7 @@ export const EVENT_APP_MIND_EMBEDDED_RESIZE='mind-embedded-resize'
 export const EVENT_APP_MIND_NODE_REMARK_PREVIEW='mind-note-preview'
 export const EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE='mind-note-input-active'
 export const EVENT_APP_MIND_NODE_PRIORITY='mind-node-priority'
+export const EVENT_APP_MIND_NODE_LINK = 'mind-node-link';
 /**
  * mindmap自带的事件
  */

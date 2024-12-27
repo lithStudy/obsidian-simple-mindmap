@@ -20,7 +20,7 @@
 // import ExportPDF from 'simple-mind-map/src/plugins/ExportPDF.js'
 import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown.js'
 import { Notice } from "obsidian";
-import {EVENT_APP_CSS_CHANGE, EVENT_APP_MIND_EXPORT, EVENT_APP_MIND_NODE_PRIORITY, EVENT_APP_LAYOUT_CHANGE, EVENT_APP_RESIZE} from "../constants/constant";
+import {EVENT_APP_CSS_CHANGE, EVENT_APP_MIND_EXPORT, EVENT_APP_MIND_NODE_PRIORITY, EVENT_APP_LAYOUT_CHANGE, EVENT_APP_RESIZE, EVENT_APP_MIND_NODE_LINK} from "../constants/constant";
 import { FileSuggestModal } from '../utils/file-suggest-modal';
 
 export default {
@@ -206,59 +206,7 @@ export default {
         }
     },
     setLink() {
-        if (this.mindMap.renderer.activeNodeList.length <= 0) {
-            return
-        }
-        const node = this.mindMap.renderer.activeNodeList[0];
-        
-        // 打开文件选择器
-        const fileModal = new FileSuggestModal(this.app);
-        fileModal.setPlaceholder("输入文件名搜索，或输入自定义链接文本");
-        
-        // 重写getSuggestions方法，添加自定义输入选项
-        const originalGetSuggestions = fileModal.getSuggestions.bind(fileModal);
-        fileModal.getSuggestions = (query) => {
-            const files = originalGetSuggestions(query);
-            if (query && (!files.length || !files.some(file => file.basename.toLowerCase() === query.toLowerCase()))) {
-                // 如果有输入内容，且没有完全匹配的文件，添加自定义选项
-                return [
-                    {
-                        // 使用特殊对象来标识这是自定义输入
-                        isCustomInput: true,
-                        basename: query,
-                        path: `使用自定义文本: ${query}`
-                    },
-                    ...files
-                ];
-            }
-            return files;
-        };
-
-        // 重写renderSuggestion方法，为自定义输入添加特殊样式
-        const originalRenderSuggestion = fileModal.renderSuggestion.bind(fileModal);
-        fileModal.renderSuggestion = (file, el) => {
-            if (file.isCustomInput) {
-                el.createEl("div", { text: file.path });
-                el.addClass("custom-input-suggestion");
-            } else {
-                originalRenderSuggestion(file, el);
-            }
-        };
-        
-        // 重写onChooseSuggestion方法
-        fileModal.onChooseSuggestion = (file) => {
-            if (file.isCustomInput) {
-                // 如果是自定义输入
-                node.setHyperlink(file.basename, file.basename);
-            } else {
-                // 如果是文件
-                console.log("选择文件", file);
-                const fileName = file.basename;
-                node.setHyperlink(`[[${fileName}]]`, fileName);
-            }
-        };
-        
-        fileModal.open();
+        this.app.workspace.trigger(EVENT_APP_MIND_NODE_LINK);
     },
 
 
