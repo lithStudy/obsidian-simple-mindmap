@@ -8,14 +8,14 @@
                :contentEl="contentEl">
     </Navigator>
 
-    <mind-tools v-if="showMindTools && mindMapReady"
+    <MindTools v-if="showMindTools && mindMapReady"
                 :mindMap="mindMap"
                 :app="app"
                 :contentEl="contentEl"
                 :mode="mode"
                 :mindFile="mindFile"
                 @remakModelToggle="remarkModelToggle"
-    ></mind-tools>
+    ></MindTools>
 
     <NodeNoteContentShow
         :app="app"
@@ -64,7 +64,8 @@ interface CustomFile extends TFile {
 
 import {  
   reactive,
-  onMounted
+  onMounted,
+  beforeUnmount
 } from "vue";
 import MindMap from "simple-mind-map";
 import Drag from "simple-mind-map/src/plugins/Drag.js";
@@ -272,8 +273,8 @@ export default {
     // 清空事件引用
     this.eventRefs = {};
   },
-  beforeDestroy() {
-    console.log("Main.vue beforeDestroy")
+  beforeUnmount() {
+    console.log("Main.vue beforeUnmount")
   },
   methods: {
     initMindDataRef(){
