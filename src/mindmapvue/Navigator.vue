@@ -74,7 +74,10 @@ export default {
   },
   mounted() {
     this.init()
-    this.setPosition();
+    // 确保在DOM完全渲染后再设置位置
+    this.$nextTick(() => {
+      this.setPosition();
+    });
 
     this.mindMap.on(EVENT_MIND_DATA_CHANGE, this.view_data_change)
     this.mindMap.on(EVENT_MIND_VIEW_DATA_CHANGE, this.view_data_change)
@@ -107,9 +110,7 @@ export default {
       })
     },
     view_data_change() {
-      //TODO 这里用这种方式画小地图会出现一个问题：父组件被卸载了，这个小地图还在画，导致报错，考虑使用 _.debounce 替代（保存可能也有一样的问题）
       this.throttleDrawMiniMap();
-      // this.drawMiniMap()
     },
     init() {
       let {width, height} = this.$refs.navigatorBox.getBoundingClientRect()
@@ -141,14 +142,18 @@ export default {
       // this.init();
       // this.setPosition();
     },
-    throttleDrawMiniMap: _.debounce(function (){
-      //这里由于有一定的延迟性，用户操作太快，有可能出现小地图还没来记得渲染主页面就被关闭的情况，这种情况会导致延迟执行的小地图渲染报错，此处直接catch
-      try {
-        this.drawMiniMap();
-      } catch (error) {
-        console.log(error)
-      }
-
+    throttleDrawMiniMap: _.debounce(function() {
+        try {
+            if(!this.$refs.svgBox || !this.mindMap) {
+                console.warn('Required elements not found for mini map rendering');
+                return;
+            }
+            this.drawMiniMap();
+        } catch (error) {
+            console.error('Failed to render mini map:', error);
+            // 可以添加错误提示UI
+            this.showMiniMap = false;
+        }
     }, MINIMAP_DEBOUNCE_TIME_MILLIS),
 
     onMousedown(e) {
@@ -176,9 +181,11 @@ export default {
       }
     },
     setPosition() {
+      if(!this.contentEl) return;
       // 获取父容器和子元素
       const parentElement = this.contentEl.parentElement
       const childElement = this.contentEl.querySelector('#mindMapContainer');
+      if(!parentElement || !childElement) return;
       // 获取子元素相对于父容器的位置信息
       const parentRect = parentElement.getBoundingClientRect();
       const childRect = childElement.getBoundingClientRect();

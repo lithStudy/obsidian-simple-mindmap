@@ -15,6 +15,7 @@ export const FILE_EXTENSION = "mind";
  */
 export const EVENT_APP_RESIZE='resize'
 export const EVENT_APP_CSS_CHANGE='css-change'
+export const EVENT_APP_LAYOUT_CHANGE='layout-change'
 export const EVENT_APP_QUICK_PREVIEW='quick-preview'
 export const EVENT_APP_LEAF_CHANGE_ACTIVE='active-leaf-change'
 /**
@@ -26,6 +27,7 @@ export const EVENT_APP_MIND_EMBEDDED_RESIZE='mind-embedded-resize'
 export const EVENT_APP_MIND_NODE_REMARK_PREVIEW='mind-note-preview'
 export const EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE='mind-note-input-active'
 export const EVENT_APP_MIND_NODE_PRIORITY='mind-node-priority'
+export const EVENT_APP_MIND_NODE_LINK = 'mind-node-link';
 /**
  * mindmap自带的事件
  */

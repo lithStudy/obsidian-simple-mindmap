@@ -43,16 +43,26 @@ export default {
     }
   },
   created() {
-    this.app.workspace.on(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
+    console.log("NodeNoteContentShow created")
     this.contentEl.addEventListener('click', this.hideNoteContent)
     document.body.addEventListener('click', this.hideNoteContent)
   },
   mounted() {
+    console.log("NodeNoteContentShow mounted")
+    this.app.workspace.on(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
     this.initEditor()
   },
+  unmounted(){
+      console.log("NodeNoteContentShow unmounted")
+      this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
+      document.body.removeEventListener('click', this.hideNoteContent)
+      if (this.$refs.noteContentViewer) {
+        this.$refs.noteContentViewer.removeEventListener('click')
+      }
+  },
   beforeDestroy() {
-    this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
-    document.body.removeEventListener('click', this.hideNoteContent)
+    console.log("NodeNoteContentShow beforeDestroy")
+   
   },
   methods: {
     /**
@@ -60,19 +70,26 @@ export default {
      * @Date: 2022-11-14 19:56:08
      * @Desc: 显示备注浮层
      */
+    processObsidianLinks(content) {
+      // 将 [[链接]] 转换为特殊样式的 HTML
+      return content.replace(/\[\[(.*?)\]\]/g, 
+      '<a href="#" class="obsidian-link" data-link="$1">[[<span class="link-text">$1</span>]]</a>'
+    );
+    },
+
     onShowNoteContent(content, left, top) {
-      //计算偏移
-      // let rect = this.app.workspace.activeLeaf.containerEl.getBoundingClientRect();
       let rect = this.contentEl.getBoundingClientRect();
-      // debugger
       const paddingTop = parseFloat(getComputedStyle(this.contentEl).paddingTop);
       const paddingBottom = parseFloat(getComputedStyle(this.contentEl).paddingBottom);
 
-      this.left = left -rect.x
-      this.top = top-rect.y+paddingTop+paddingBottom
+      this.left = left - rect.x;
+      this.top = top - rect.y + paddingTop + paddingBottom;
 
-      this.editor.setMarkdown(content)
-      this.show = true
+      // 处理内容中的 Obsidian 链接
+      const processedContent = this.processObsidianLinks(content);
+      this.editor.setMarkdown(processedContent);
+      
+      this.show = true;
     },
 
     /**
@@ -90,10 +107,20 @@ export default {
      * @Desc: 初始化编辑器
      */
     initEditor() {
-      if (!this.editor) {
+      if (!this.editor && this.$refs.noteContentViewer) {
         this.editor = new Viewer({
           el: this.$refs.noteContentViewer
-        })
+        });
+
+        // 直接在容器元素上添加点击事件监听
+        this.$refs.noteContentViewer.addEventListener('click', (event) => {
+          const target = event.target.closest('.obsidian-link');
+          if (target) {
+            event.preventDefault();
+            // 使用 Obsidian API 打开链接
+            this.app.workspace.openLinkText(target.dataset.link, '', true, { active: true });
+          }
+        });
       }
     }
   }
@@ -125,6 +152,19 @@ export default {
     box-shadow: none;
     background: transparent;
     display: none;
+  }
+
+  :deep(.obsidian-link) {
+    color: var(--text-accent);
+    cursor: pointer;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+    
+    .link-text {
+      color: var(--text-normal);
+    }
   }
 }
 </style>

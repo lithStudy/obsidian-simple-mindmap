@@ -29,13 +29,16 @@
         "moduleResolution": "node",
 
         /* Specify a list of bundled lib declaration files that describe the target runtime environment. */
-        /* 指定一组在运行时环境中默认导入的依赖项. */
+        /* 指定一组��行时环境中默认导入的依赖项. */
         "lib": ["ESNext", "DOM"],
 
         /* Specify the language version of the generated JavaScript code. */
         /* 指定生成的 JavaScript 代码的语言版本. */
         "target": "ESNext",
         "skipLibCheck": true,
+        "noImplicitAny": false,
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true
     }
 
     /*** See more keys and their definitions at https://www.typescriptlang.org/tsconfig. */

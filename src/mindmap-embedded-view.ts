@@ -4,14 +4,8 @@ import {PluginValue, ViewPlugin, ViewUpdate} from "@codemirror/view";
 import {App, MarkdownView, WorkspaceLeaf} from "obsidian";
 import {App as VueApp,createApp} from "vue";
 import {
-    EVENT_APP_CSS_CHANGE,
     EVENT_APP_MIND_EMBEDDED_RESIZE,
-    EVENT_APP_LEAF_CHANGE_ACTIVE, EVENT_APP_MIND_EXPORT,
-    EVENT_MIND_NODE_ACTIVE,
-    EVENT_APP_MIND_NODE_REMARK_PREVIEW, EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, EVENT_APP_MIND_NODE_PRIORITY,
-    EVENT_APP_QUICK_PREVIEW,
-    EVENT_APP_MIND_REFRESH,
-    EVENT_APP_RESIZE, FILE_EXTENSION
+    FILE_EXTENSION
 } from "./constants/constant";
 import {findEmbeddedMindFile, getEmbeddedLoomLinkEls, hasLoadedEmbeddedMind} from "./embedded/embed-utils";
 import SimpleMindMap from "./mindmapvue/Main.vue";
@@ -57,20 +51,6 @@ export default function PreviewPlugin(
                         item.unmount();
                     }
                 }
-
-                // app.workspace.off(EVENT_APP_RESIZE, undefined as any);
-                // app.workspace.off(EVENT_APP_CSS_CHANGE, undefined as any)
-                // app.workspace.off(EVENT_APP_QUICK_PREVIEW, undefined as any)
-                // app.workspace.off(EVENT_APP_LEAF_CHANGE_ACTIVE, undefined as any)
-
-                // app.workspace.off(EVENT_APP_MIND_REFRESH, undefined as any);
-                // app.workspace.off(EVENT_APP_MIND_EMBEDDED_RESIZE, undefined as any);
-                // app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW, undefined as any)
-                // app.workspace.off(EVENT_APP_MIND_NODE_REMARK_INPUT_ACTIVE, undefined as any)
-                // app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY, undefined as any)
-                // app.workspace.off(EVENT_APP_MIND_EXPORT, undefined as any)
-
-                // app.workspace.off(EVENT_MIND_NODE_ACTIVE, undefined as any)
             }
 
 
