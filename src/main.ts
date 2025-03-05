@@ -208,7 +208,7 @@ export default class SamplePlugin extends Plugin {
                     console.log(`思维导图链接已插入到当前文件: ${linkText}`);
 
                     // 添加延迟，确保文件创建完成并且mindMap组件有足够时间初始化
-                    // setTimeout(async () => {
+                    setTimeout(async () => {
                         try {
                             //Open file in a new tab and set it to active
                             await this.app.workspace.getLeaf(true).setViewState({
@@ -221,7 +221,7 @@ export default class SamplePlugin extends Plugin {
                             console.error("打开思维导图文件时出错:", error);
                             new Notice("打开思维导图文件时出错，请尝试手动打开");
                         }
-                    // }, 1200); // 增加延迟时间，确保文件创建完成
+                    }, 300); // 增加延迟时间，确保文件创建完成
                 } catch (error) {
                     console.error("执行create-and-embed命令时出错:", error);
                     new Notice("创建思维导图时出错");
