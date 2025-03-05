@@ -167,7 +167,8 @@ export default class SamplePlugin extends Plugin {
             name: "Create mindMap",
             // hotkeys: [{ modifiers: ["Mod", "Shift"], key: "=" }],
             callback: async () => {
-                await this.newMindMapFile(null);
+                console.log("执行create命令")
+                await this.newMindMapFile(null,false,null,null);
             },
             icon: "mindmap-icon.svg"
             
@@ -207,7 +208,7 @@ export default class SamplePlugin extends Plugin {
                     console.log(`思维导图链接已插入到当前文件: ${linkText}`);
 
                     // 添加延迟，确保文件创建完成并且mindMap组件有足够时间初始化
-                    setTimeout(async () => {
+                    // setTimeout(async () => {
                         try {
                             //Open file in a new tab and set it to active
                             await this.app.workspace.getLeaf(true).setViewState({
@@ -220,7 +221,7 @@ export default class SamplePlugin extends Plugin {
                             console.error("打开思维导图文件时出错:", error);
                             new Notice("打开思维导图文件时出错，请尝试手动打开");
                         }
-                    }, 1200); // 增加延迟时间，确保文件创建完成
+                    // }, 1200); // 增加延迟时间，确保文件创建完成
                 } catch (error) {
                     console.error("执行create-and-embed命令时出错:", error);
                     new Notice("创建思维导图时出错");
@@ -466,6 +467,7 @@ export default class SamplePlugin extends Plugin {
         if (normalized === ".") return "/";
         return normalized;
     }
+    
 
     private async newMindMapFile(
         contextMenuFolderPath: string | null,
@@ -494,6 +496,7 @@ export default class SamplePlugin extends Plugin {
             return new Promise<string>((resolve) => {
                 const maxRetries = 5;
                 let retryCount = 0;
+                console.log("尝试创建文件")
                 
                 const tryOpenFile = async () => {
                     try {
@@ -503,6 +506,7 @@ export default class SamplePlugin extends Plugin {
                             throw new Error("文件尚未完全创建");
                         }
                         
+                        console.log(`尝试打开文件：${filePath}`)
                         // 尝试打开文件
                         await this.app.workspace.getLeaf(true).setViewState({
                             type: MUFENG_MARKMIND_VIEW,
@@ -525,8 +529,10 @@ export default class SamplePlugin extends Plugin {
                     }
                 };
                 
-                // 首次尝试，给一个短暂的初始延迟
-                setTimeout(tryOpenFile, 100);
+                // 首次尝试
+                tryOpenFile()
+                
+                // setTimeout(tryOpenFile, 10);
             });
         } catch (error) {
             console.error("创建思维导图文件时出错:", error);

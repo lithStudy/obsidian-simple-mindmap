@@ -75,76 +75,78 @@ export class MufengMindMapView extends TextFileView {
             
             //debugger
             // 这里如果是打开新标签页，容器可能还没有渲染完成，无法执行命令，延迟一点时间
-            setTimeout(() => {
-                try {
-                    //视窗大小为0，说明焦点不在当前页面，不重置大小（思维导图的尺寸定位是根据视窗大小来的，如果焦点不在当前页面，视窗获取到的宽度和高度就是0）
-                    const elRect = newDiv.getBoundingClientRect()
-                    const widthTemp = elRect.width
-                    const heightTemp = elRect.height
-                    
-                    console.log(`容器实际尺寸: 宽度=${widthTemp}, 高度=${heightTemp}`);
-                    
-                    if (heightTemp <= 0 || widthTemp <= 0) {
-                        console.log("导图容器不在视窗内");
-                        
-                        // 增加重试逻辑
-                        this.retryCount++;
-                        if (this.retryCount <= maxRetries) {
-                            console.log(`尝试重新初始化思维导图视图 (${this.retryCount}/${maxRetries})...`);
-                            setTimeout(() => {
-                                this.initMind();
-                            }, 800); // 增加延迟时间
-                        } else {
-                            console.error(`已达到最大重试次数(${maxRetries})，思维导图视图初始化失败`);
-                        }
-                        return;
-                    }
-                    
-                    // 重置重试计数
-                    this.retryCount = 0;
-                    
-                    //debugger
-                    const mindContainerId = Math.random();
-                    console.log("准备创建Vue应用");
-                    
-                    this.mindApp = createApp(SimpleMindMap, {
-                        leaf: this.leaf,
-                        viewId: this.viewId,
-                        mindFile: this.file,
-                        mindContainerId: mindContainerId,
-                        initMindData: this.markMindData,
-                        app: this.app,
-                        mode: 'edit',
-                        initNoteMode:'slide',
-                        initElementHeight: heightWithoutPadding +"px",
-                        showMiniMap: true,
-                        showMindTools:true,
-                        enableAutoEnterTextEditWhenKeydown:true,
-                        // contentEl: this.containerEl,
-                        contentEl:this.contentEl
-                    })
-                    console.log("createApp after")
-                    // const vm = this.mindApp.mount(newDiv);
-                    // this.markMind = vm.mindMap
+            // setTimeout(() => {
+                
+            // }, 800); // 增加延迟时间，确保DOM已完全渲染
 
-                    this.markMind= this.mindApp.mount(newDiv);
-                    console.log("思维导图视图初始化成功");
-                    
-                } catch (error) {
-                    console.error("初始化思维导图视图时出错:", error);
+            try {
+                //视窗大小为0，说明焦点不在当前页面，不重置大小（思维导图的尺寸定位是根据视窗大小来的，如果焦点不在当前页面，视窗获取到的宽度和高度就是0）
+                const elRect = newDiv.getBoundingClientRect()
+                const widthTemp = elRect.width
+                const heightTemp = elRect.height
+                
+                console.log(`容器实际尺寸: 宽度=${widthTemp}, 高度=${heightTemp}`);
+                
+                if (heightTemp <= 0 || widthTemp <= 0) {
+                    console.log("导图容器不在视窗内");
                     
                     // 增加重试逻辑
                     this.retryCount++;
                     if (this.retryCount <= maxRetries) {
-                        console.log(`发生错误，尝试重新初始化思维导图视图 (${this.retryCount}/${maxRetries})...`);
+                        console.log(`尝试重新初始化思维导图视图 (${this.retryCount}/${maxRetries})...`);
                         setTimeout(() => {
                             this.initMind();
                         }, 800); // 增加延迟时间
                     } else {
                         console.error(`已达到最大重试次数(${maxRetries})，思维导图视图初始化失败`);
                     }
+                    return;
                 }
-            }, 800); // 增加延迟时间，确保DOM已完全渲染
+                
+                // 重置重试计数
+                this.retryCount = 0;
+                
+                //debugger
+                const mindContainerId = Math.random();
+                console.log("准备创建Vue应用");
+                
+                this.mindApp = createApp(SimpleMindMap, {
+                    leaf: this.leaf,
+                    viewId: this.viewId,
+                    mindFile: this.file,
+                    mindContainerId: mindContainerId,
+                    initMindData: this.markMindData,
+                    app: this.app,
+                    mode: 'edit',
+                    initNoteMode:'slide',
+                    initElementHeight: heightWithoutPadding +"px",
+                    showMiniMap: true,
+                    showMindTools:true,
+                    enableAutoEnterTextEditWhenKeydown:true,
+                    // contentEl: this.containerEl,
+                    contentEl:this.contentEl
+                })
+                console.log("createApp after")
+                // const vm = this.mindApp.mount(newDiv);
+                // this.markMind = vm.mindMap
+
+                this.markMind= this.mindApp.mount(newDiv);
+                console.log("思维导图视图初始化成功");
+                
+            } catch (error) {
+                console.error("初始化思维导图视图时出错:", error);
+                
+                // 增加重试逻辑
+                this.retryCount++;
+                if (this.retryCount <= maxRetries) {
+                    console.log(`发生错误，尝试重新初始化思维导图视图 (${this.retryCount}/${maxRetries})...`);
+                    setTimeout(() => {
+                        this.initMind();
+                    }, 800); // 增加延迟时间
+                } else {
+                    console.error(`已达到最大重试次数(${maxRetries})，思维导图视图初始化失败`);
+                }
+            }
 
         }
     }
