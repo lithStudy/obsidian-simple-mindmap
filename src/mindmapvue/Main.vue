@@ -457,11 +457,15 @@ export default {
         textareaElement.focus();
       }
     },
-    leafChangeActiveRef(leaf: WorkspaceLeaf){
+    async leafChangeActiveRef(leaf: WorkspaceLeaf){
       if (!leaf) return;
       console.log("EVENT_APP_LEAF_CHANGE_ACTIVE:"+leaf.id+" this:"+this.leaf.id)
       if (this.leaf.id === leaf.id) {
-        this.mindResize();
+        console.log("leafChangeActiveRef")
+        // this.mindResize();
+        const orginData = await this.app.vault.read(this.mindFile);        
+        this.mindMap.renderer.setData(JSON.parse(orginData));
+        this.mindMap.reRender()
       }
     },
     cssChangeMethRef(){
@@ -482,6 +486,7 @@ export default {
       this.firstRender = false;
     },
     embedResizeMethodRef(leaf: WorkspaceLeaf){
+      console.log("embedResizeMethodRef:"+this.mydata.compId)
       //是当前页，且是嵌入模式
       if (this.leaf.id === leaf.id && this.mode==='embedded') {
         this.mindResize();

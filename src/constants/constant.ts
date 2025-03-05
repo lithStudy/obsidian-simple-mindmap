@@ -58,5 +58,5 @@ export const EXTENSION_REGEX = new RegExp(/\.[a-z]*$/);
 export const WIKI_LINK_REGEX = new RegExp(/\[\[([^|\]]+)(?:\|([\w-]+))?\]\]/g);
 
 
-export const SAVE_THROTTLE_TIME_MILLIS = 3000;
+export const SAVE_THROTTLE_TIME_MILLIS = 500;
 export const MINIMAP_DEBOUNCE_TIME_MILLIS = 500;
