@@ -9,6 +9,7 @@ import {
     ViewState,
     MarkdownView,
     normalizePath,
+    Notice
 } from 'obsidian';
 import {SampleSettingTab} from "./setting-tab";
 import {MufengMindMapView, MUFENG_MARKMIND_VIEW} from "./mindmap-edit-view"
@@ -177,31 +178,53 @@ export default class SamplePlugin extends Plugin {
             name: "Create mindMap and embed it into current file",
             // hotkeys: [{ modifiers: ["Mod", "Shift"], key: "+" }],
             editorCallback: async (editor) => {
-                const filePath = await this.newMindMapFile(null, true,null,null);
-                if (!filePath) return;
+                try {
+                    console.log("执行create-and-embed命令");
+                    const filePath = await this.newMindMapFile(null, true, null, null);
+                    if (!filePath) {
+                        console.error("创建思维导图文件失败");
+                        return;
+                    }
+                    
+                    console.log(`思维导图文件创建成功: ${filePath}，准备嵌入到当前文件`);
 
-                const useMarkdownLinks = (this.app.vault as any).getConfig(
-                    "useMarkdownLinks"
-                );
+                    const useMarkdownLinks = (this.app.vault as any).getConfig(
+                        "useMarkdownLinks"
+                    );
 
-                // Use basename rather than whole name when using Markdownlink like ![abcd](abcd.loom) instead of ![abcd.loom](abcd.loom)
-                // It will replace `.loom` to "" in abcd.loom
-                const linkText = useMarkdownLinks
-                    ? `![${getBasename(filePath)}](${encodeURI(filePath)})`
-                    : `![[${filePath}]]`;
+                    // Use basename rather than whole name when using Markdownlink like ![abcd](abcd.loom) instead of ![abcd.loom](abcd.loom)
+                    // It will replace `.loom` to "" in abcd.loom
+                    const linkText = useMarkdownLinks
+                        ? `![${getBasename(filePath)}](${encodeURI(filePath)})`
+                        : `![[${filePath}]]`;
 
-                editor.replaceRange(linkText, editor.getCursor());
-                editor.setCursor(
-                    editor.getCursor().line,
-                    editor.getCursor().ch + linkText.length
-                );
+                    editor.replaceRange(linkText, editor.getCursor());
+                    editor.setCursor(
+                        editor.getCursor().line,
+                        editor.getCursor().ch + linkText.length
+                    );
+                    
+                    console.log(`思维导图链接已插入到当前文件: ${linkText}`);
 
-                //Open file in a new tab and set it to active
-                await this.app.workspace.getLeaf(true).setViewState({
-                    type: MUFENG_MARKMIND_VIEW,
-                    active: true,
-                    state: { file: filePath },
-                });
+                    // 添加延迟，确保文件创建完成并且mindMap组件有足够时间初始化
+                    setTimeout(async () => {
+                        try {
+                            //Open file in a new tab and set it to active
+                            await this.app.workspace.getLeaf(true).setViewState({
+                                type: MUFENG_MARKMIND_VIEW,
+                                active: true,
+                                state: { file: filePath },
+                            });
+                            console.log("思维导图文件已在新标签页中打开");
+                        } catch (error) {
+                            console.error("打开思维导图文件时出错:", error);
+                            new Notice("打开思维导图文件时出错，请尝试手动打开");
+                        }
+                    }, 1200); // 增加延迟时间，确保文件创建完成
+                } catch (error) {
+                    console.error("执行create-and-embed命令时出错:", error);
+                    new Notice("创建思维导图时出错");
+                }
             },
         });
         this.addCommand({
@@ -248,6 +271,8 @@ export default class SamplePlugin extends Plugin {
                 }
             }
         });
+
+        
 
         //激活备注
         this.addCommand({
@@ -448,24 +473,66 @@ export default class SamplePlugin extends Plugin {
         initData?:string,
         fileName?:string,
     ) {
-        const folderPath = this.getFolderForNewMindFile(contextMenuFolderPath);
-        const filePath = await createMindMapFile(
-            this.app,
-            folderPath,
-            this.manifest.version,
-            initData?initData:JSON.stringify(this.settings.defaultInitData),
-            fileName
-        );
+        try {
+            const folderPath = this.getFolderForNewMindFile(contextMenuFolderPath);
+            console.log(`创建思维导图文件，路径: ${folderPath}`);
+            
+            const filePath = await createMindMapFile(
+                this.app,
+                folderPath,
+                this.manifest.version,
+                initData?initData:JSON.stringify(this.settings.defaultInitData),
+                fileName
+            );
+            
+            console.log(`思维导图文件创建成功: ${filePath}`);
 
-        //If the file is embedded, we don't need to open it
-        if (embedded) return filePath;
+            //If the file is embedded, we don't need to open it
+            if (embedded) return filePath;
 
-        //Open file in a new tab and set it to active
-        await this.app.workspace.getLeaf(true).setViewState({
-            type: MUFENG_MARKMIND_VIEW,
-            active: true,
-            state: { file: filePath },
-        });
+            // 使用渐进式重试而非固定延迟
+            return new Promise<string>((resolve) => {
+                const maxRetries = 5;
+                let retryCount = 0;
+                
+                const tryOpenFile = async () => {
+                    try {
+                        // 检查文件是否存在且已被索引
+                        const file = this.app.vault.getAbstractFileByPath(filePath);
+                        if (!file) {
+                            throw new Error("文件尚未完全创建");
+                        }
+                        
+                        // 尝试打开文件
+                        await this.app.workspace.getLeaf(true).setViewState({
+                            type: MUFENG_MARKMIND_VIEW,
+                            active: true,
+                            state: { file: filePath },
+                        });
+                        console.log(`思维导图文件已在新标签页中打开: ${filePath}`);
+                        resolve(filePath);
+                    } catch (error) {
+                        retryCount++;
+                        if (retryCount <= maxRetries) {
+                            console.log(`尝试打开文件失败，第${retryCount}次重试...`);
+                            // 指数退避策略，每次等待时间翻倍
+                            setTimeout(tryOpenFile, 200 * Math.pow(1.5, retryCount-1));
+                        } else {
+                            console.error("多次尝试后仍无法打开思维导图文件:", error);
+                            new Notice("打开思维导图文件时出错，请尝试手动打开");
+                            resolve(filePath);
+                        }
+                    }
+                };
+                
+                // 首次尝试，给一个短暂的初始延迟
+                setTimeout(tryOpenFile, 100);
+            });
+        } catch (error) {
+            console.error("创建思维导图文件时出错:", error);
+            new Notice("创建思维导图文件时出错");
+            return null;
+        }
     }
 
 

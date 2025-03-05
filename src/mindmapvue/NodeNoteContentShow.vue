@@ -43,19 +43,26 @@ export default {
     }
   },
   created() {
-    this.app.workspace.on(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
+    console.log("NodeNoteContentShow created")
     this.contentEl.addEventListener('click', this.hideNoteContent)
     document.body.addEventListener('click', this.hideNoteContent)
   },
   mounted() {
+    console.log("NodeNoteContentShow mounted")
+    this.app.workspace.on(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
     this.initEditor()
   },
+  unmounted(){
+      console.log("NodeNoteContentShow unmounted")
+      this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
+      document.body.removeEventListener('click', this.hideNoteContent)
+      if (this.$refs.noteContentViewer) {
+        this.$refs.noteContentViewer.removeEventListener('click')
+      }
+  },
   beforeDestroy() {
-    this.app.workspace.off(EVENT_APP_MIND_NODE_REMARK_PREVIEW, this.onShowNoteContent)
-    document.body.removeEventListener('click', this.hideNoteContent)
-    if (this.$refs.noteContentViewer) {
-      this.$refs.noteContentViewer.removeEventListener('click')
-    }
+    console.log("NodeNoteContentShow beforeDestroy")
+   
   },
   methods: {
     /**
@@ -110,22 +117,12 @@ export default {
           const target = event.target.closest('.obsidian-link');
           if (target) {
             event.preventDefault();
-            this.handleLinkClick(target.dataset.link);
+            // 使用 Obsidian API 打开链接
+            this.app.workspace.openLinkText(target.dataset.link, '', true, { active: true });
           }
         });
       }
-    },
-
-    handleLinkClick(linkPath) {
-      // 获取当前工作区
-      const workspace = this.app.workspace;
-      
-      // 使用 Obsidian API 打开链接
-      workspace.openLinkText(linkPath, '', true, { active: true });
-      
-      // 点击后隐藏备注预览
-      this.hideNoteContent();
-    },
+    }
   }
 }
 </script>

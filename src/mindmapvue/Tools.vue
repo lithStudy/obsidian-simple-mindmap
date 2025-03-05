@@ -7,6 +7,7 @@
         ref="mindToolsBox"
     >
       <div @click="resize()" class="toolsButton">重定位</div>
+      <div @click="refresh()" class="toolsButton">刷新</div>
       <div @click="remark()" v-if="this.mode !== 'embedded' && this.mode !== 'preview'" id="remarkButton" class="toolsButton">备注</div>
       <div @click="priority()" v-if="this.mode !== 'embedded' && this.mode !== 'preview'" id="priorityButton" class="toolsButton">优先级</div>
       <div @click="setLink()" v-if="this.mode !== 'embedded' && this.mode !== 'preview'" id="linkButton" class="toolsButton">设置链接</div>
@@ -21,7 +22,6 @@
 import { transformToMarkdown } from 'simple-mind-map/src/parse/toMarkdown.js'
 import { Notice } from "obsidian";
 import {EVENT_APP_CSS_CHANGE, EVENT_APP_MIND_EXPORT, EVENT_APP_MIND_NODE_PRIORITY, EVENT_APP_LAYOUT_CHANGE, EVENT_APP_RESIZE, EVENT_APP_MIND_NODE_LINK} from "../constants/constant";
-import { FileSuggestModal } from '../utils/file-suggest-modal';
 
 export default {
   props: {
@@ -35,6 +35,9 @@ export default {
       required:false
     },
     mode: {
+      required: false
+    },
+    mindFile:{
       required: false
     }
   },
@@ -60,30 +63,23 @@ export default {
     // ...mapState(['isDark']),
   },
   mounted() {
+    console.log("Tools mounted")
     // this.updateTheme()
     this.setPosition();
-    this.app.workspace.on(EVENT_APP_CSS_CHANGE, () => {
-      this.updateTheme()
-    },this.app)
+    this.app.workspace.on(EVENT_APP_CSS_CHANGE, this.updateTheme,this.app)
 
     this.app.workspace.on(EVENT_APP_MIND_NODE_PRIORITY,this.priority)
-
     this.app.workspace.on(EVENT_APP_MIND_EXPORT,this.exportData)
-
     // 监听工作区布局变化
-    this.app.workspace.on('layout-change', () => {
-        this.setPosition();
-    });
-
+    this.app.workspace.on(EVENT_APP_LAYOUT_CHANGE, this.setPosition);
     // 监听窗口大小调整
-    this.app.workspace.on('resize', () => {
-        this.setPosition();
-    });
+    this.app.workspace.on(EVENT_APP_RESIZE, this.setPosition);
   },
-  destroyed() {
-    this.app.workspace.off(EVENT_APP_CSS_CHANGE);
-    this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY);
-    this.app.workspace.off(EVENT_APP_MIND_EXPORT)
+  unmounted() {
+    console.log("Tools unmounted")
+    this.app.workspace.off(EVENT_APP_CSS_CHANGE,this.updateTheme,this.app);
+    this.app.workspace.off(EVENT_APP_MIND_NODE_PRIORITY,this.priority);
+    this.app.workspace.off(EVENT_APP_MIND_EXPORT,this.exportData)
 
     // 清理事件监听
     this.app.workspace.off(EVENT_APP_LAYOUT_CHANGE);
@@ -93,9 +89,15 @@ export default {
     resize(){
       // console.log("定位根节点")
       this.mindMap.resize();
-      this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root,false)
+      // this.mindMap.renderer.moveNodeToCenter(this.mindMap.renderer.root,false)
       //缩放思维导图至适应画布
       this.mindMap.view.fit()
+    },
+    async refresh(){
+      const newMindData = await this.app.vault.read(this.mindFile);
+      // this.mindMap.setData(newMindData)
+      this.mindMap.renderer.setData(JSON.parse(newMindData));
+      this.mindMap.reRender()
     },
     remark(){
       console.log("点击备注按钮")
