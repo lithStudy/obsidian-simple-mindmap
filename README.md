@@ -1,3 +1,8 @@
+官方已经开发了obsidian的插件，我这个半吊子终于不用维护这个项目了。官方的就是专业，非常好用，请各位前往
+https://github.com/wanglin2/obsidian-simplemindmap
+
+
+
 首先感谢并推荐此思维导图开源项目：https://github.com/wanglin2/mind-map
 
 这是一个非常棒的完全开源的可本地化思维导图项目，感谢 @街角小林 的开源，希望大家多多过去点赞标星
