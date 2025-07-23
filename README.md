@@ -2,6 +2,8 @@
 https://github.com/wanglin2/obsidian-simplemindmap
 
 
+---
+
 
 首先感谢并推荐此思维导图开源项目：https://github.com/wanglin2/mind-map
 
